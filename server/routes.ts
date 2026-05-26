@@ -2536,6 +2536,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gallery routes (public GET, authenticated POST/PUT/DELETE)
+  app.get("/api/gallery", async (req, res) => {
+    try {
+      const { category } = req.query;
+      const items = category
+        ? await storage.getGalleryItemsByCategory(category as string)
+        : await storage.getGalleryItems();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.get("/api/gallery/:id", async (req, res) => {
+    try {
+      const item = await storage.getGalleryItem(parseInt(req.params.id));
+      if (!item) return res.status(404).json({ message: "Item not found" });
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/api/gallery", isAuthenticated, async (req, res) => {
+    try {
+      const { insertGalleryItemSchema } = await import("@shared/schema");
+      const data = insertGalleryItemSchema.parse(req.body);
+      const item = await storage.createGalleryItem(data);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/gallery/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { insertGalleryItemSchema } = await import("@shared/schema");
+      const data = insertGalleryItemSchema.partial().parse(req.body);
+      const item = await storage.updateGalleryItem(parseInt(req.params.id), data);
+      if (!item) return res.status(404).json({ message: "Item not found" });
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/gallery/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteGalleryItem(parseInt(req.params.id));
+      if (!deleted) return res.status(404).json({ message: "Item not found" });
+      res.json({ message: "Eliminado exitosamente" });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  // Page Content routes (public GET, authenticated PUT)
+  app.get("/api/page-content", async (req, res) => {
+    try {
+      const contents = await storage.getPageContents();
+      res.json(contents);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/page-content/:key", isAuthenticated, async (req, res) => {
+    try {
+      const { key } = req.params;
+      const { value, section, label } = req.body;
+      const content = await storage.upsertPageContent(key, value, section, label);
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/api/page-content", isAuthenticated, async (req, res) => {
+    try {
+      const { key, value, section, label } = req.body;
+      const content = await storage.upsertPageContent(key, value, section, label);
+      res.status(201).json(content);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  // Public contact form (creates a lead)
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const lead = await storage.createLead({
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        service: req.body.service,
+        message: req.body.message,
+        status: "new",
+      });
+      res.status(201).json({ message: "Mensaje enviado exitosamente", id: lead.id });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  // Users management routes (admin only)
+  app.get("/api/users", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "admin" && req.user.role !== "superadmin") {
+        return res.status(403).json({ message: "Acceso denegado" });
+      }
+      const { db: database } = await import("./db");
+      const { users: usersTable } = await import("@shared/schema");
+      const allUsers = await database.select().from(usersTable);
+      const safeUsers = allUsers.map(({ password, ...u }) => u);
+      res.json(safeUsers);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "admin" && req.user.role !== "superadmin") {
+        return res.status(403).json({ message: "Acceso denegado" });
+      }
+      const { db: database } = await import("./db");
+      const { users: usersTable } = await import("@shared/schema");
+      const { name, role, username } = req.body;
+      const [updated] = await database.update(usersTable)
+        .set({ name, role, username })
+        .where(eq(usersTable.id, parseInt(req.params.id)))
+        .returning();
+      const { password, ...safeUser } = updated;
+      res.json(safeUser);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      if (req.user.role !== "admin" && req.user.role !== "superadmin") {
+        return res.status(403).json({ message: "Acceso denegado" });
+      }
+      if (parseInt(req.params.id) === req.user.id) {
+        return res.status(400).json({ message: "No puedes eliminar tu propio usuario" });
+      }
+      const { db: database } = await import("./db");
+      const { users: usersTable } = await import("@shared/schema");
+      await database.delete(usersTable).where(eq(usersTable.id, parseInt(req.params.id)));
+      res.json({ message: "Usuario eliminado" });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
   // Admin routes
   app.post("/api/admin/reset-database", isAuthenticated, async (req, res) => {
     try {

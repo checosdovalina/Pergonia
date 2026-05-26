@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting, leads, Lead, InsertLead } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting, leads, Lead, InsertLead, galleryItems, GalleryItem, InsertGalleryItem, pageContent, PageContent, InsertPageContent } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -129,6 +129,20 @@ export interface IStorage {
   createLead(lead: InsertLead): Promise<Lead>;
   updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined>;
   deleteLead(id: number): Promise<boolean>;
+
+  // Gallery methods
+  getGalleryItems(): Promise<GalleryItem[]>;
+  getGalleryItem(id: number): Promise<GalleryItem | undefined>;
+  getGalleryItemsByCategory(category: string): Promise<GalleryItem[]>;
+  createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
+  updateGalleryItem(id: number, item: Partial<InsertGalleryItem>): Promise<GalleryItem | undefined>;
+  deleteGalleryItem(id: number): Promise<boolean>;
+
+  // Page Content methods
+  getPageContents(): Promise<PageContent[]>;
+  getPageContent(key: string): Promise<PageContent | undefined>;
+  upsertPageContent(key: string, value: string, section?: string, label?: string): Promise<PageContent>;
+  deletePageContent(key: string): Promise<boolean>;
   
   // Admin methods
   resetDatabase(): Promise<{ success: boolean; message: string }>;
@@ -1348,6 +1362,111 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Gallery methods
+  async getGalleryItems(): Promise<GalleryItem[]> {
+    try {
+      return await db.select().from(galleryItems).orderBy(galleryItems.displayOrder);
+    } catch (error) {
+      console.error("Error fetching gallery items:", error);
+      return [];
+    }
+  }
+
+  async getGalleryItem(id: number): Promise<GalleryItem | undefined> {
+    try {
+      const [item] = await db.select().from(galleryItems).where(eq(galleryItems.id, id));
+      return item || undefined;
+    } catch (error) {
+      console.error("Error fetching gallery item:", error);
+      return undefined;
+    }
+  }
+
+  async getGalleryItemsByCategory(category: string): Promise<GalleryItem[]> {
+    try {
+      return await db.select().from(galleryItems).where(eq(galleryItems.category, category)).orderBy(galleryItems.displayOrder);
+    } catch (error) {
+      console.error("Error fetching gallery items by category:", error);
+      return [];
+    }
+  }
+
+  async createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem> {
+    try {
+      const [newItem] = await db.insert(galleryItems).values(item).returning();
+      return newItem;
+    } catch (error) {
+      console.error("Error creating gallery item:", error);
+      throw error;
+    }
+  }
+
+  async updateGalleryItem(id: number, item: Partial<InsertGalleryItem>): Promise<GalleryItem | undefined> {
+    try {
+      const [updated] = await db.update(galleryItems).set(item).where(eq(galleryItems.id, id)).returning();
+      return updated || undefined;
+    } catch (error) {
+      console.error("Error updating gallery item:", error);
+      return undefined;
+    }
+  }
+
+  async deleteGalleryItem(id: number): Promise<boolean> {
+    try {
+      await db.delete(galleryItems).where(eq(galleryItems.id, id));
+      return true;
+    } catch (error) {
+      console.error("Error deleting gallery item:", error);
+      return false;
+    }
+  }
+
+  // Page Content methods
+  async getPageContents(): Promise<PageContent[]> {
+    try {
+      return await db.select().from(pageContent).orderBy(pageContent.section);
+    } catch (error) {
+      console.error("Error fetching page contents:", error);
+      return [];
+    }
+  }
+
+  async getPageContent(key: string): Promise<PageContent | undefined> {
+    try {
+      const [content] = await db.select().from(pageContent).where(eq(pageContent.key, key));
+      return content || undefined;
+    } catch (error) {
+      console.error("Error fetching page content:", error);
+      return undefined;
+    }
+  }
+
+  async upsertPageContent(key: string, value: string, section: string = "general", label: string = ""): Promise<PageContent> {
+    try {
+      const existing = await this.getPageContent(key);
+      if (existing) {
+        const [updated] = await db.update(pageContent).set({ value, section, label, updatedAt: new Date() }).where(eq(pageContent.key, key)).returning();
+        return updated;
+      } else {
+        const [created] = await db.insert(pageContent).values({ key, value, section, label }).returning();
+        return created;
+      }
+    } catch (error) {
+      console.error("Error upserting page content:", error);
+      throw error;
+    }
+  }
+
+  async deletePageContent(key: string): Promise<boolean> {
+    try {
+      await db.delete(pageContent).where(eq(pageContent.key, key));
+      return true;
+    } catch (error) {
+      console.error("Error deleting page content:", error);
+      return false;
+    }
+  }
+
   async resetDatabase(): Promise<{ success: boolean; message: string }> {
     try {
       // Delete all data from all tables EXCEPT users
@@ -1523,6 +1642,20 @@ export class MemStorage implements IStorage {
   async createLead(lead: InsertLead): Promise<Lead> { throw new Error("Not implemented"); }
   async updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined> { return undefined; }
   async deleteLead(id: number): Promise<boolean> { return false; }
+
+  // Gallery methods
+  async getGalleryItems(): Promise<GalleryItem[]> { return []; }
+  async getGalleryItem(id: number): Promise<GalleryItem | undefined> { return undefined; }
+  async getGalleryItemsByCategory(category: string): Promise<GalleryItem[]> { return []; }
+  async createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem> { throw new Error("Not implemented"); }
+  async updateGalleryItem(id: number, item: Partial<InsertGalleryItem>): Promise<GalleryItem | undefined> { return undefined; }
+  async deleteGalleryItem(id: number): Promise<boolean> { return false; }
+
+  // Page Content methods
+  async getPageContents(): Promise<PageContent[]> { return []; }
+  async getPageContent(key: string): Promise<PageContent | undefined> { return undefined; }
+  async upsertPageContent(key: string, value: string, section?: string, label?: string): Promise<PageContent> { throw new Error("Not implemented"); }
+  async deletePageContent(key: string): Promise<boolean> { return false; }
   
   // Admin methods
   async resetDatabase(): Promise<{ success: boolean; message: string }> {

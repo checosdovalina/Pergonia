@@ -1,0 +1,1 @@
+- [Pergonia site architecture](pergonia-site.md) — New commercial website for Pergonia (pools/social areas) built on top of the existing Dovalina app with new schema tables, pages, and routes.

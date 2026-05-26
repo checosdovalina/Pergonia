@@ -25,6 +25,9 @@ import PurchaseOrders from "@/pages/purchase-orders";
 import SimpleQuotes from "@/pages/simple-quotes";
 import Settings from "@/pages/settings";
 import Leads from "@/pages/leads";
+import AdminGallery from "@/pages/admin-gallery";
+import AdminContent from "@/pages/admin-content";
+import AdminUsers from "@/pages/admin-users";
 
 function Router() {
   return (
@@ -49,6 +52,9 @@ function Router() {
       <ProtectedRoute path="/dashboard/reports" component={Reports} />
       <ProtectedRoute path="/dashboard/settings" component={Settings} />
       <ProtectedRoute path="/dashboard/leads" component={Leads} />
+      <ProtectedRoute path="/dashboard/gallery" component={AdminGallery} />
+      <ProtectedRoute path="/dashboard/content" component={AdminContent} />
+      <ProtectedRoute path="/dashboard/users" component={AdminUsers} />
       <Route component={NotFound} />
     </Switch>
   );

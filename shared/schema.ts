@@ -855,6 +855,44 @@ export const insertLeadSchema = createInsertSchema(leads).pick({
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 
+// Gallery Items schema
+export const galleryItems = pgTable("gallery_items", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  category: text("category").notNull().default("albercas"), // albercas, areas_sociales, jardines, pergolas, remodelacion
+  displayOrder: integer("display_order").default(0),
+  isVisible: boolean("is_visible").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertGalleryItemSchema = createInsertSchema(galleryItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type GalleryItem = typeof galleryItems.$inferSelect;
+export type InsertGalleryItem = z.infer<typeof insertGalleryItemSchema>;
+
+// Page Content schema (CMS)
+export const pageContent = pgTable("page_content", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 255 }).notNull().unique(),
+  value: text("value"),
+  section: text("section").notNull().default("general"),
+  label: text("label"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertPageContentSchema = createInsertSchema(pageContent).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type PageContent = typeof pageContent.$inferSelect;
+export type InsertPageContent = z.infer<typeof insertPageContentSchema>;
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),

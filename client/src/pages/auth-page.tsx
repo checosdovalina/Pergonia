@@ -3,17 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock } from "lucide-react";
+import { Lock, Droplets, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-import logoImg from "@assets/JPG_3_1764824638626.jpg";
+import { Link } from "wouter";
 
 const loginSchema = z.object({
-  username: z.string().min(1, { message: "Username is required" }),
-  password: z.string().min(1, { message: "Password is required" }),
+  username: z.string().min(1, { message: "El usuario es requerido" }),
+  password: z.string().min(1, { message: "La contraseña es requerida" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -24,125 +24,139 @@ export default function AuthPage() {
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
+    defaultValues: { username: "", password: "" },
   });
   
   useEffect(() => {
-    if (user) {
-      setLocation("/dashboard");
-    }
+    if (user) setLocation("/dashboard");
   }, [user, setLocation]);
   
   const onLoginSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate({
-      username: data.username,
-      password: data.password,
-    });
+    loginMutation.mutate({ username: data.username, password: data.password });
   };
   
   return (
-    <div className="min-h-screen flex bg-gray-50 safe-area-inset">
-      {/* Left side - Company info and features */}
-      <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-8 py-12 bg-gradient-to-br from-primary/5 to-secondary/10">
-        <div className="max-w-md mx-auto text-center">
-          <div className="mb-8">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-48 w-auto mx-auto mb-6 drop-shadow-lg" />
-            <p className="text-gray-600 text-lg">Management system for efficient handling of clients, projects, personnel, and quotes.</p>
+    <div className="min-h-screen flex bg-[#f8f4ec]">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-12 py-12"
+        style={{ background: "linear-gradient(145deg, #3a4a28 0%, #4d6035 60%, #2c3a1e 100%)" }}>
+        <div className="max-w-md">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Droplets className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="font-bold text-2xl text-white tracking-wide">PERGONIA</div>
+              <div className="text-white/60 text-sm">Arquitectura Exterior</div>
+            </div>
           </div>
-          
-          <div className="bg-secondary/20 p-6 rounded-lg">
-            <h2 className="text-lg font-medium text-gray-800 mb-4">Key features:</h2>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Client and prospect management</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Kanban-style project tracking</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Quote generation and tracking</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Personnel and assignment management</span>
-              </li>
-            </ul>
+
+          <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
+            Portal de Administración
+          </h2>
+          <p className="text-white/70 text-lg mb-10 leading-relaxed">
+            Gestiona tu sitio web, galería de proyectos, clientes y cotizaciones desde un solo lugar.
+          </p>
+
+          <div className="space-y-4">
+            {[
+              "Administra clientes y cotizaciones",
+              "Actualiza la galería de proyectos",
+              "Edita el contenido del sitio web",
+              "Gestiona usuarios y accesos",
+            ].map(f => (
+              <div key={f} className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-[#c9a962]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 text-[#c9a962]" />
+                </div>
+                <span className="text-white/80 text-sm">{f}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <Link href="/">
+              <button className="text-sm text-white/50 hover:text-white transition-colors">
+                ← Volver al sitio web
+              </button>
+            </Link>
           </div>
         </div>
       </div>
       
-      {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-md w-full">
-          {/* Mobile logo */}
+      {/* Right panel - Login form */}
+      <div className="w-full lg:w-2/5 xl:w-1/3 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
           <div className="lg:hidden text-center mb-8">
-            <img src={logoImg} alt="Dovalina Pro Painters" className="h-28 mx-auto mb-4" />
+            <div className="flex items-center justify-center gap-2.5 mb-2">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                <Droplets className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-xl text-primary tracking-wide">PERGONIA</span>
+            </div>
+            <p className="text-muted-foreground text-sm">Arquitectura Exterior</p>
           </div>
           
-          <Card className="shadow-lg border-0">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-4">
-                  <Lock className="h-6 w-6 text-primary" />
+          <Card className="shadow-lg border-0 bg-white">
+            <CardContent className="pt-8 pb-8 px-8">
+              <div className="text-center mb-7">
+                <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
+                  <Lock className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-xl font-semibold mb-1">Login</h2>
-                <p className="text-sm text-gray-500 mb-6">Enter your credentials to access the system</p>
+                <h2 className="text-xl font-bold text-foreground">Iniciar Sesión</h2>
+                <p className="text-sm text-muted-foreground mt-1">Accede al portal de administración</p>
               </div>
               
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="username" className="text-sm font-medium">Usuario</Label>
                   <Input 
                     id="username" 
-                    placeholder="username"
+                    placeholder="tu_usuario"
+                    className="bg-[#f8f4ec] border-[#e8e0cc] focus:border-primary"
                     {...loginForm.register("username")}
                   />
                   {loginForm.formState.errors.username && (
-                    <p className="text-sm text-red-500">{loginForm.formState.errors.username.message}</p>
+                    <p className="text-xs text-destructive">{loginForm.formState.errors.username.message}</p>
                   )}
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-sm font-medium">Contraseña</Label>
                   <Input 
                     id="password" 
                     type="password"
-                    placeholder="********"
+                    placeholder="••••••••"
+                    className="bg-[#f8f4ec] border-[#e8e0cc] focus:border-primary"
                     {...loginForm.register("password")}
                   />
                   {loginForm.formState.errors.password && (
-                    <p className="text-sm text-red-500">{loginForm.formState.errors.password.message}</p>
+                    <p className="text-xs text-destructive">{loginForm.formState.errors.password.message}</p>
                   )}
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-5" 
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? "Logging in..." : "Login"}
+                  {loginMutation.isPending ? "Entrando..." : "Iniciar Sesión"}
                 </Button>
               </form>
               
-              <p className="mt-6 text-center text-sm text-gray-500">
-                If you don't have an account, please contact an administrator to provide you with access to the system.
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                ¿Sin cuenta? Solicita acceso a un administrador.
               </p>
             </CardContent>
           </Card>
+
+          <div className="text-center mt-6 lg:hidden">
+            <Link href="/">
+              <button className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                ← Volver al sitio web
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
