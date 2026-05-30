@@ -3,5 +3,6 @@ type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/landing-pergonia/BoldAsimetrico.tsx": () => import("../components/mockups/landing-pergonia/BoldAsimetrico.tsx"),
   "./components/mockups/landing-pergonia/CenteredMinimal.tsx": () => import("../components/mockups/landing-pergonia/CenteredMinimal.tsx"),
-  "./components/mockups/landing-pergonia/HorizontalSplit.tsx": () => import("../components/mockups/landing-pergonia/HorizontalSplit.tsx")
+  "./components/mockups/landing-pergonia/HorizontalSplit.tsx": () => import("../components/mockups/landing-pergonia/HorizontalSplit.tsx"),
+  "./components/mockups/landing-pergonia/MixBC.tsx": () => import("../components/mockups/landing-pergonia/MixBC.tsx")
 };
