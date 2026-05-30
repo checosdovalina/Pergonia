@@ -1,93 +1,43 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { GalleryItem } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Phone, Mail, MapPin, CheckCircle, Star, Menu, X,
-  ChevronDown, Droplets, Home, Building2, Palmtree, Wrench,
-  ShieldCheck, Clock, Award, ThumbsUp, ArrowRight, Facebook,
-  Instagram, MessageCircle
-} from "lucide-react";
-import { Link } from "wouter";
+import { Menu, X } from "lucide-react";
+import pergoniaLogo from "@assets/pergonia_logo_transparent.png";
 
 const PHONE = "871 218 7073";
 const PHONE_LINK = "tel:+528712187073";
 const EMAIL = "contacto@pergonia.mx";
 const WHATSAPP = "https://wa.me/528712187073";
-const LOCATION = "Torreón, Coahuila";
 
 const services = [
   {
-    icon: <Droplets className="w-10 h-10" />,
-    title: "Albercas Residenciales",
-    desc: "Diseño y construcción de albercas a la medida para hogares. Desde albercas clásicas hasta infinity pools con los mejores acabados.",
-    img: "https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=500&q=80",
+    num: "01",
+    title: "Diseño de Albercas",
+    desc: "Creamos oasis personalizados que se integran perfectamente con la arquitectura de tu hogar. Desde albercas clásicas hasta infinity pools con los mejores acabados.",
   },
   {
-    icon: <Building2 className="w-10 h-10" />,
-    title: "Albercas Comerciales",
-    desc: "Proyectos de gran formato para hoteles, clubes deportivos, fraccionamientos y desarrollos turísticos en La Comarca Lagunera.",
-    img: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=500&q=80",
-  },
-  {
-    icon: <Palmtree className="w-10 h-10" />,
+    num: "02",
     title: "Áreas Sociales",
-    desc: "Creamos espacios exteriores para vivir: pérgolas, asadores, quioscos, jardines y terrazas que elevan tu estilo de vida.",
-    img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
+    desc: "Transformamos tu patio en el lugar perfecto para convivir. Terrazas, palapas, áreas de asador y fire pits diseñados con los más altos estándares de calidad y lujo.",
   },
   {
-    icon: <Wrench className="w-10 h-10" />,
-    title: "Remodelación y Mantenimiento",
-    desc: "Renovamos albercas existentes, impermeabilizamos, cambiamos sistemas de filtración y remodelamos áreas sociales completas.",
-    img: "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=500&q=80",
+    num: "03",
+    title: "Paisajismo Integral",
+    desc: "El toque final que da vida a tu proyecto. Selección experta de flora, diseño de iluminación exterior y elementos naturales que complementan la estructura principal.",
   },
-];
-
-const reasons = [
-  { icon: <Award className="w-7 h-7" />, title: "Más de 15 Años de Experiencia", desc: "Trayectoria comprobada en proyectos residenciales y comerciales en Torreón y La Comarca Lagunera." },
-  { icon: <ShieldCheck className="w-7 h-7" />, title: "Garantía en Obra", desc: "Todos nuestros proyectos cuentan con garantía en mano de obra y materiales para tu tranquilidad." },
-  { icon: <Clock className="w-7 h-7" />, title: "Entrega a Tiempo", desc: "Cumplimos los plazos acordados. Tu proyecto se entrega en tiempo y forma, sin sorpresas." },
-  { icon: <ThumbsUp className="w-7 h-7" />, title: "Materiales de Primera", desc: "Usamos solo materiales de alta calidad y proveedores certificados para garantizar durabilidad." },
-];
-
-const steps = [
-  { num: "01", title: "Asesoría Gratuita", desc: "Visitamos tu espacio sin costo y analizamos las posibilidades de diseño." },
-  { num: "02", title: "Diseño y Cotización", desc: "Elaboramos el diseño personalizado y una cotización clara y detallada." },
-  { num: "03", title: "Construcción", desc: "Nuestro equipo experto ejecuta el proyecto con supervisión permanente." },
-  { num: "04", title: "Entrega y Garantía", desc: "Entregamos tu proyecto terminado con garantía escrita incluida." },
-];
-
-const testimonials = [
-  { name: "Carlos Ramírez", loc: "Torreón, Coah.", text: "Excelente trabajo en nuestra alberca familiar. El equipo fue muy profesional y el resultado superó nuestras expectativas. Totalmente recomendados.", stars: 5 },
-  { name: "María González", loc: "Gómez Palacio, Dgo.", text: "Contratamos a Pergonia para nuestra área social con asador y quiosco. El diseño quedó increíble y la calidad de los materiales es de primera.", stars: 5 },
-  { name: "Hotel Río Grande", loc: "Torreón, Coah.", text: "Construyeron la alberca principal de nuestro hotel. Proyecto de gran envergadura, entregado a tiempo y con acabados de lujo.", stars: 5 },
-];
-
-const galleryCategories = [
-  { key: "todos", label: "Todos" },
-  { key: "albercas", label: "Albercas" },
-  { key: "areas_sociales", label: "Áreas Sociales" },
-  { key: "jardines", label: "Jardines" },
-  { key: "pergolas", label: "Pérgolas" },
 ];
 
 const defaultGallery = [
-  { id: 1, title: "Alberca Infinity", category: "albercas", imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80", description: "Proyecto residencial Torreón" },
-  { id: 2, title: "Área Social con Palapa", category: "areas_sociales", imageUrl: "https://images.unsplash.com/photo-1592595896551-12b371d546d3?w=600&q=80", description: "Desarrollo privado Gómez Palacio" },
-  { id: 3, title: "Alberca Comercial", category: "albercas", imageUrl: "https://images.unsplash.com/photo-1543361373-d3834a782993?w=600&q=80", description: "Hotel Comarca Lagunera" },
-  { id: 4, title: "Jardín con Fuente", category: "jardines", imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&q=80", description: "Casa residencial Torreón" },
-  { id: 5, title: "Pérgola Moderna", category: "pergolas", imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=600&q=80", description: "Área social Lerdo, Dgo." },
-  { id: 6, title: "Alberca Familiar", category: "albercas", imageUrl: "https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=600&q=80", description: "Proyecto residencial" },
+  { id: 1, title: "Alberca Infinity", category: "albercas", imageUrl: "https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=900", description: "Proyecto residencial Torreón", isVisible: true },
+  { id: 2, title: "Área Social con Palapa", category: "areas_sociales", imageUrl: "https://images.unsplash.com/photo-1560347876-aeef00ee58a1?w=600", description: "Desarrollo privado", isVisible: true },
+  { id: 3, title: "Alberca Comercial", category: "albercas", imageUrl: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600", description: "Hotel Comarca Lagunera", isVisible: true },
+  { id: 4, title: "Jardín Exterior", category: "jardines", imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200", description: "Casa residencial Torreón", isVisible: true },
 ];
 
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("todos");
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
@@ -97,7 +47,8 @@ export default function LandingPage() {
   });
 
   const contactMutation = useMutation({
-    mutationFn: (data: typeof formData) => apiRequest("POST", "/api/contact", data).then(r => r.json()),
+    mutationFn: (data: typeof formData) =>
+      apiRequest("POST", "/api/contact", data).then((r) => r.json()),
     onSuccess: () => {
       setSubmitted(true);
       setFormData({ name: "", email: "", phone: "", service: "", message: "" });
@@ -109,9 +60,7 @@ export default function LandingPage() {
   });
 
   const displayGallery = galleryItems.length > 0 ? galleryItems : defaultGallery;
-  const filteredGallery = activeCategory === "todos"
-    ? displayGallery.filter(i => i.isVisible !== false)
-    : displayGallery.filter(i => i.category === activeCategory && i.isVisible !== false);
+  const visibleGallery = displayGallery.filter((i) => i.isVisible !== false).slice(0, 4);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -120,311 +69,173 @@ export default function LandingPage() {
 
   useEffect(() => {
     document.title = "Pergonia | Diseño y Construcción de Albercas y Áreas Sociales — Torreón, Coahuila";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "Pergonia — Especialistas en diseño y construcción de albercas residenciales, albercas comerciales y áreas sociales en Torreón, Coahuila y La Comarca Lagunera. Más de 15 años de experiencia. Solicita tu asesoría gratuita.");
+    const existing = document.querySelector('meta[name="description"]');
+    const content = "Pergonia — Especialistas en diseño y construcción de albercas residenciales, albercas comerciales y áreas sociales en Torreón, Coahuila y La Comarca Lagunera. Más de 15 años de experiencia.";
+    if (existing) {
+      existing.setAttribute("content", content);
     } else {
-      const newMeta = document.createElement("meta");
-      newMeta.name = "description";
-      newMeta.content = "Pergonia — Especialistas en diseño y construcción de albercas residenciales, albercas comerciales y áreas sociales en Torreón, Coahuila y La Comarca Lagunera. Más de 15 años de experiencia. Solicita tu asesoría gratuita.";
-      document.head.appendChild(newMeta);
+      const m = document.createElement("meta");
+      m.name = "description";
+      m.content = content;
+      document.head.appendChild(m);
     }
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8f4ec] text-[#1a1a1a] font-sans">
-      {/* Structured data for SEO */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "Pergonia — Arquitectura Exterior",
-        "description": "Especialistas en diseño y construcción de albercas, áreas sociales y arquitectura exterior en Torreón, Coahuila y La Comarca Lagunera.",
-        "telephone": "+52 871 218 7073",
-        "address": { "@type": "PostalAddress", "addressLocality": "Torreón", "addressRegion": "Coahuila", "addressCountry": "MX" },
-        "geo": { "@type": "GeoCoordinates", "latitude": "25.5428", "longitude": "-103.4068" },
-        "url": "https://pergonia.mx",
-        "priceRange": "$$",
-        "openingHours": "Mo-Fr 08:00-18:00",
-        "serviceArea": { "@type": "Place", "name": "La Comarca Lagunera, México" },
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Servicios Pergonia",
-          "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Construcción de Albercas Residenciales" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Albercas Comerciales" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Diseño de Áreas Sociales" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Remodelación de Albercas" } },
-          ]
-        }
-      }) }} />
+    <div
+      className="min-h-screen bg-[#f5f0e8] text-gray-900"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      {/* SEO structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            name: "Pergonia — Arquitectura Exterior",
+            description: "Especialistas en diseño y construcción de albercas, áreas sociales y arquitectura exterior en Torreón, Coahuila.",
+            telephone: "+52 871 218 7073",
+            email: EMAIL,
+            address: { "@type": "PostalAddress", addressLocality: "Torreón", addressRegion: "Coahuila", addressCountry: "MX" },
+            url: "https://pergonia.mx",
+            serviceArea: { "@type": "Place", name: "La Comarca Lagunera, México" },
+          }),
+        }}
+      />
 
-      {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#e8e0cc] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-9 h-9 bg-primary rounded">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 3h8v2H5v4H3V3zm13 0h5v6h-2V5h-3V3zM3 15h2v4h6v2H3v-6zm16 4h-3v2h5v-6h-2v4z"/>
-                  <rect x="7" y="7" width="10" height="10" rx="1" opacity=".4"/>
-                </svg>
-              </div>
-              <div>
-                <span className="font-bold text-lg text-primary tracking-wide">PERGONIA</span>
-                <span className="hidden sm:block text-xs text-muted-foreground -mt-0.5">Arquitectura Exterior</span>
-              </div>
-            </div>
+      {/* ── NAVBAR ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-12 py-4 text-[#f5f0e8]">
+        <button onClick={() => scrollTo("hero")} className="focus:outline-none">
+          <img
+            src={pergoniaLogo}
+            alt="Pergonia Arquitectura Exterior"
+            className="h-20 w-auto"
+            style={{ filter: "brightness(0) invert(1)" }}
+          />
+        </button>
 
-            <div className="hidden lg:flex items-center gap-6">
-              {[["inicio","Inicio"],["servicios","Servicios"],["galeria","Galería"],["nosotros","Nosotros"],["contacto","Contacto"]].map(([id, label]) => (
-                <button key={id} onClick={() => scrollTo(id)} className="text-sm font-medium text-[#1a1a1a]/70 hover:text-primary transition-colors">
-                  {label}
-                </button>
-              ))}
-              <Button onClick={() => scrollTo("contacto")} size="sm" className="bg-primary hover:bg-primary/90 text-white">
-                Cotización Gratis
-              </Button>
-              <Link href="/auth">
-                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Admin</Button>
-              </Link>
-            </div>
-
-            <button className="lg:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {/* Desktop links */}
+        <div className="hidden md:flex gap-10 text-xs uppercase tracking-widest font-semibold">
+          {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
+            <button
+              key={id}
+              onClick={() => scrollTo(id)}
+              className="hover:text-[#c9a962] transition-colors duration-300 capitalize"
+            >
+              {id === "galeria" ? "Galería" : id.charAt(0).toUpperCase() + id.slice(1)}
             </button>
-          </div>
-        </div>
-
-        {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-[#e8e0cc] px-4 pb-4">
-            {[["inicio","Inicio"],["servicios","Servicios"],["galeria","Galería"],["nosotros","Nosotros"],["contacto","Contacto"]].map(([id, label]) => (
-              <button key={id} onClick={() => scrollTo(id)} className="block w-full text-left py-3 text-sm font-medium border-b border-[#e8e0cc] last:border-0">
-                {label}
-              </button>
-            ))}
-            <Button onClick={() => scrollTo("contacto")} className="w-full mt-3 bg-primary text-white">
-              Cotización Gratis
-            </Button>
-          </div>
-        )}
-      </nav>
-
-      {/* HERO */}
-      <section id="inicio" className="relative min-h-screen flex items-center pt-16 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #3a4a28 0%, #4d6035 40%, #2c3a1e 100%)" }}>
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(20)].map((_, i) => (
-            <div key={i} className="absolute rounded-full bg-white"
-              style={{ width: `${Math.random()*200+50}px`, height: `${Math.random()*200+50}px`, top: `${Math.random()*100}%`, left: `${Math.random()*100}%`, opacity: Math.random()*0.3 }} />
           ))}
         </div>
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, #fff 40px, #fff 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, #fff 40px, #fff 41px)" }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <div className="max-w-3xl">
-            <Badge className="mb-6 bg-[#c9a962]/20 text-[#c9a962] border-[#c9a962]/30 px-4 py-1.5 text-sm font-medium">
-              Torreón · La Comarca Lagunera
-            </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              Diseñamos{" "}
-              <span className="text-[#c9a962]">albercas y espacios</span>{" "}
-              que transforman tu vida
-            </h1>
-            <p className="text-lg sm:text-xl text-white/75 mb-10 leading-relaxed max-w-2xl">
-              Especialistas en construcción de albercas residenciales, comerciales y áreas sociales de lujo en Torreón, Coahuila y toda La Comarca Lagunera.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" onClick={() => scrollTo("contacto")}
-                className="bg-[#c9a962] hover:bg-[#b89550] text-[#1a1a1a] font-semibold px-8 py-6 text-base">
-                Asesoría Gratuita <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => scrollTo("galeria")}
-                className="border-white/40 text-white hover:bg-white/10 px-8 py-6 text-base bg-transparent">
-                Ver Proyectos
-              </Button>
-            </div>
-
-            <div className="mt-14 flex flex-wrap gap-8">
-              {[["150+", "Proyectos realizados"], ["15+", "Años de experiencia"], ["100%", "Clientes satisfechos"]].map(([val, label]) => (
-                <div key={label}>
-                  <div className="text-3xl font-bold text-[#c9a962]">{val}</div>
-                  <div className="text-sm text-white/60 mt-1">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <button onClick={() => scrollTo("servicios")} className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 hover:text-white transition-colors animate-bounce">
-          <ChevronDown className="w-8 h-8" />
+        <button
+          onClick={() => scrollTo("contacto")}
+          className="hidden md:block border border-[#c9a962] text-[#c9a962] px-5 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
+        >
+          Cotización
         </button>
-      </section>
 
-      {/* SERVICES */}
-      <section id="servicios" className="py-20 lg:py-28 bg-[#f8f4ec]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Nuestros Servicios</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-4">
-              Todo lo que necesitas para tu proyecto
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Desde el diseño inicial hasta la entrega final, cubrimos cada etapa con profesionalismo y calidad.
-            </p>
-          </div>
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden text-[#f5f0e8]"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menú"
+        >
+          {menuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+        </button>
+      </nav>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((s) => (
-              <div key={s.title} className="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img src={s.img} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="p-6">
-                  <div className="text-primary mb-3">{s.icon}</div>
-                  <h3 className="font-bold text-lg mb-2 text-[#1a1a1a]">{s.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-40 bg-[#4a5e30] flex flex-col items-center justify-center gap-10">
+          {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
+            <button
+              key={id}
+              onClick={() => scrollTo(id)}
+              className="text-[#f5f0e8] text-3xl font-serif tracking-wide hover:text-[#c9a962] transition-colors"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              {id === "galeria" ? "Galería" : id.charAt(0).toUpperCase() + id.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── HERO ── */}
+      <section id="hero" className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1600"
+            alt="Alberca de lujo"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
+        <div className="relative z-10 text-center text-[#f5f0e8] px-4 w-full">
+          <h1
+            className="text-[12vw] leading-[0.9] tracking-tight mb-6"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Pergonia
+          </h1>
+          <p className="text-lg md:text-xl lg:text-2xl font-light tracking-wide max-w-2xl mx-auto uppercase">
+            Arquitectura Exterior
+          </p>
         </div>
       </section>
 
-      {/* GALLERY */}
-      <section id="galeria" className="py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Galería de Proyectos</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-4">Nuestras Obras Realizadas</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Cada proyecto es único. Conoce algunos de nuestros trabajos en Torreón y La Comarca Lagunera.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2 justify-center mb-10">
-            {galleryCategories.map(({ key, label }) => (
-              <button key={key} onClick={() => setActiveCategory(key)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === key ? "bg-primary text-white" : "bg-[#f8f4ec] text-[#1a1a1a]/70 hover:bg-primary/10"
-                }`}>
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredGallery.slice(0, 6).map((item) => (
-              <div key={item.id} className="group relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <img src={item.imageUrl} alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                  <div>
-                    <div className="text-white font-semibold">{item.title}</div>
-                    {item.description && <div className="text-white/70 text-sm">{item.description}</div>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Button variant="outline" onClick={() => scrollTo("contacto")} className="border-primary text-primary hover:bg-primary hover:text-white px-8">
-              Solicitar Cotización <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* WHY US */}
-      <section id="nosotros" className="py-20 lg:py-28 bg-[#f8f4ec]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">¿Por qué elegirnos?</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-6 leading-tight">
-                La empresa líder en albercas de La Comarca Lagunera
-              </h2>
-              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                En Pergonia combinamos diseño arquitectónico, ingeniería de calidad y atención personalizada para crear espacios acuáticos y sociales que superan expectativas. Somos la elección de familias y empresas en Torreón, Gómez Palacio y Lerdo.
-              </p>
-              <div className="space-y-4">
-                {["Asesoría y diseño gratuito sin compromiso","Presupuesto detallado y transparente","Personal certificado y con experiencia","Garantía escrita en todos los proyectos","Materiales de importación de primera calidad","Seguimiento post-entrega incluido"].map(benefit => (
-                  <div key={benefit} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-[#1a1a1a]/80">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
-                  <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 w-4 h-4" /> Chatea por WhatsApp
-                  </a>
-                </Button>
-              </div>
+      {/* ── STATS ── */}
+      <section className="py-24 md:py-32 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
+          {[
+            { num: "150+", label: "Proyectos Entregados" },
+            { num: "15", label: "Años de Experiencia" },
+            { num: "100%", label: "Satisfacción del Cliente" },
+          ].map((stat) => (
+            <div key={stat.label} className="space-y-4">
+              <h3
+                className="text-6xl md:text-8xl lg:text-9xl text-[#c9a962] font-semibold tracking-tighter"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                {stat.num}
+              </h3>
+              <p className="text-sm uppercase tracking-widest text-[#4a5e30] font-semibold">{stat.label}</p>
             </div>
-
-            <div className="grid grid-cols-2 gap-5">
-              {reasons.map(r => (
-                <div key={r.title} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="text-primary mb-3 bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center">{r.icon}</div>
-                  <h3 className="font-bold text-[#1a1a1a] mb-2 leading-snug">{r.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{r.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* PROCESS */}
-      <section className="py-20 lg:py-28 bg-primary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <Badge className="mb-4 bg-white/10 text-white border-white/20">Proceso</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">¿Cómo trabajamos?</h2>
-            <p className="text-white/70 max-w-xl mx-auto">Un proceso simple, claro y sin complicaciones del inicio al fin.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, i) => (
-              <div key={step.num} className="text-center relative">
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-1/2 w-full h-px bg-white/20" />
-                )}
-                <div className="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#c9a962] text-[#1a1a1a] font-bold text-xl mb-4">
-                  {step.num}
+      {/* ── SERVICES ── */}
+      <section id="servicios" className="py-24 md:py-32 bg-white px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2
+            className="text-5xl md:text-7xl text-[#4a5e30] mb-24 text-center"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Nuestros Servicios
+          </h2>
+          <div className="space-y-32">
+            {services.map((service) => (
+              <div key={service.num} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-3 text-center lg:text-right">
+                  <span
+                    className="text-8xl md:text-[10rem] leading-none text-[#c9a962] font-bold"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {service.num}
+                  </span>
                 </div>
-                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-                <p className="text-white/70 text-sm leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section className="py-20 lg:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Testimonios</Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-4">Lo que dicen nuestros clientes</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Más de 150 familias y empresas en La Comarca Lagunera confían en Pergonia.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map(t => (
-              <div key={t.name} className="bg-[#f8f4ec] rounded-2xl p-7 shadow-sm">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(t.stars)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-[#c9a962] text-[#c9a962]" />
-                  ))}
+                <div className="lg:col-span-1 hidden lg:flex justify-center">
+                  <div className="w-px h-32 bg-[#c9a962]/30"></div>
                 </div>
-                <p className="text-[#1a1a1a]/75 leading-relaxed mb-5 italic">"{t.text}"</p>
-                <div>
-                  <div className="font-bold text-[#1a1a1a]">{t.name}</div>
-                  <div className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3" /> {t.loc}
-                  </div>
+                <div className="lg:col-span-8 bg-[#4a5e30] text-[#f5f0e8] p-12 md:p-16 rounded-sm shadow-xl">
+                  <h3
+                    className="text-4xl mb-6"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {service.title}
+                  </h3>
+                  <p className="text-lg font-light leading-relaxed opacity-90 max-w-2xl">{service.desc}</p>
                 </div>
               </div>
             ))}
@@ -432,196 +243,204 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section id="contacto" className="py-20 lg:py-28 bg-[#f8f4ec]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
-            <div>
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Contacto</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-4">Solicita tu asesoría gratuita</h2>
-              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                Cuéntanos tu proyecto y te contactaremos en menos de 24 horas con una propuesta personalizada, sin costo y sin compromiso.
-              </p>
-              <div className="space-y-5">
-                <a href={PHONE_LINK} className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Phone className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Teléfono / WhatsApp</div>
-                    <div className="font-semibold text-[#1a1a1a]">{PHONE}</div>
-                  </div>
-                </a>
-                <a href={`mailto:${EMAIL}`} className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Mail className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Correo Electrónico</div>
-                    <div className="font-semibold text-[#1a1a1a]">{EMAIL}</div>
-                  </div>
-                </a>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Ubicación</div>
-                    <div className="font-semibold text-[#1a1a1a]">{LOCATION}</div>
-                    <div className="text-sm text-muted-foreground">Atendemos toda La Comarca Lagunera</div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 flex gap-3">
-                <a href={WHATSAPP} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fbc59] text-white px-5 py-3 rounded-xl font-medium transition-colors">
-                  <MessageCircle className="w-4 h-4" /> WhatsApp
-                </a>
-                <a href="https://facebook.com/pergonia.arquitectura" target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#1877F2] hover:bg-[#1565d8] text-white px-5 py-3 rounded-xl font-medium transition-colors">
-                  <Facebook className="w-4 h-4" /> Facebook
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm p-8">
-              {submitted ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-[#1a1a1a] mb-2">¡Mensaje enviado!</h3>
-                  <p className="text-muted-foreground">Nos pondremos en contacto contigo muy pronto.</p>
-                  <Button className="mt-6 bg-primary hover:bg-primary/90 text-white" onClick={() => setSubmitted(false)}>
-                    Enviar otro mensaje
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={(e) => { e.preventDefault(); contactMutation.mutate(formData); }} className="space-y-5">
-                  <h3 className="text-xl font-bold text-[#1a1a1a] mb-6">Formulario de Contacto</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#1a1a1a]/70 mb-1.5">Nombre completo *</label>
-                      <Input value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))}
-                        placeholder="Tu nombre" required className="bg-[#f8f4ec] border-[#e8e0cc]" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#1a1a1a]/70 mb-1.5">Teléfono *</label>
-                      <Input value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))}
-                        placeholder="871 xxx xxxx" required className="bg-[#f8f4ec] border-[#e8e0cc]" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1a1a1a]/70 mb-1.5">Correo electrónico</label>
-                    <Input type="email" value={formData.email} onChange={e => setFormData(p => ({...p, email: e.target.value}))}
-                      placeholder="tu@correo.com" className="bg-[#f8f4ec] border-[#e8e0cc]" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1a1a1a]/70 mb-1.5">Servicio de interés</label>
-                    <select value={formData.service} onChange={e => setFormData(p => ({...p, service: e.target.value}))}
-                      className="w-full h-10 px-3 rounded-md border border-[#e8e0cc] bg-[#f8f4ec] text-sm text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <option value="">Selecciona un servicio</option>
-                      <option value="alberca_residencial">Alberca Residencial</option>
-                      <option value="alberca_comercial">Alberca Comercial</option>
-                      <option value="area_social">Área Social</option>
-                      <option value="remodelacion">Remodelación de Alberca</option>
-                      <option value="mantenimiento">Mantenimiento</option>
-                      <option value="otro">Otro</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#1a1a1a]/70 mb-1.5">Mensaje / Descripción del proyecto</label>
-                    <Textarea value={formData.message} onChange={e => setFormData(p => ({...p, message: e.target.value}))}
-                      placeholder="Cuéntanos sobre tu proyecto..." rows={4} className="bg-[#f8f4ec] border-[#e8e0cc] resize-none" />
-                  </div>
-                  <Button type="submit" disabled={contactMutation.isPending} className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-base font-semibold">
-                    {contactMutation.isPending ? "Enviando..." : "Enviar Solicitud"}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">Te respondemos en menos de 24 horas hábiles.</p>
-                </form>
+      {/* ── GALLERY ── */}
+      <section id="galeria" className="py-24 md:py-32 px-4 md:px-8 bg-[#f5f0e8]">
+        <div className="max-w-7xl mx-auto">
+          <h2
+            className="text-5xl md:text-7xl text-[#4a5e30] mb-16 text-center"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Portafolio
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            {/* Main large image */}
+            <div className="md:col-span-8 h-[60vh] md:h-[80vh] overflow-hidden group">
+              {visibleGallery[0] && (
+                <img
+                  src={visibleGallery[0].imageUrl}
+                  alt={visibleGallery[0].title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
               )}
             </div>
+            {/* Right stacked */}
+            <div className="md:col-span-4 grid grid-rows-2 gap-4 h-[60vh] md:h-[80vh]">
+              {visibleGallery[1] && (
+                <div className="overflow-hidden group">
+                  <img
+                    src={visibleGallery[1].imageUrl}
+                    alt={visibleGallery[1].title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              {visibleGallery[2] && (
+                <div className="overflow-hidden group">
+                  <img
+                    src={visibleGallery[2].imageUrl}
+                    alt={visibleGallery[2].title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+              )}
+            </div>
+            {/* Bottom wide */}
+            {visibleGallery[3] && (
+              <div className="md:col-span-12 h-[40vh] md:h-[60vh] overflow-hidden group">
+                <img
+                  src={visibleGallery[3].imageUrl}
+                  alt={visibleGallery[3].title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-[#1a1a1a] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-                  <Droplets className="w-4 h-4 text-white" />
+      {/* ── TESTIMONIAL / NOSOTROS ── */}
+      <section id="nosotros" className="py-32 px-4 md:px-8 bg-white border-y border-[#c9a962]/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <svg className="w-12 h-12 mx-auto text-[#c9a962] mb-8" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+          </svg>
+          <blockquote
+            className="text-3xl md:text-4xl lg:text-5xl leading-tight text-[#4a5e30] mb-12"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            "Pergonia no solo construyó una alberca, diseñaron el escenario donde mi familia creará recuerdos para toda la vida. Su atención al detalle y compromiso con la excelencia es incomparable."
+          </blockquote>
+          <cite className="block text-sm uppercase tracking-widest text-gray-500 font-semibold not-italic">
+            — Familia Martínez, Torreón
+          </cite>
+        </div>
+      </section>
+
+      {/* ── CONTACT ── */}
+      <section id="contacto" className="py-32 px-4 md:px-8 bg-[#4a5e30] text-[#f5f0e8]">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2
+            className="text-5xl md:text-7xl mb-6"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Comienza tu Proyecto
+          </h2>
+          <p className="font-light text-lg mb-16 opacity-80">
+            Déjanos tus datos y un especialista en diseño exterior se pondrá en contacto contigo.
+          </p>
+
+          {submitted ? (
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 rounded-full border-2 border-[#c9a962] flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-2xl font-light" style={{ fontFamily: "'Playfair Display', serif" }}>¡Mensaje enviado!</p>
+              <p className="mt-3 opacity-70">Nos pondremos en contacto muy pronto.</p>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="mt-8 text-xs uppercase tracking-widest text-[#c9a962] hover:underline"
+              >
+                Enviar otro mensaje
+              </button>
+            </div>
+          ) : (
+            <form
+              className="space-y-8 text-left"
+              onSubmit={(e) => {
+                e.preventDefault();
+                contactMutation.mutate(formData);
+              }}
+            >
+              {[
+                { id: "name", label: "Nombre Completo", type: "text", placeholder: "Ej. Juan Pérez", field: "name" as const },
+                { id: "email", label: "Correo Electrónico", type: "email", placeholder: "juan@ejemplo.com", field: "email" as const },
+                { id: "phone", label: "Teléfono", type: "tel", placeholder: "871 000 0000", field: "phone" as const },
+              ].map(({ id, label, type, placeholder, field }) => (
+                <div key={id} className="space-y-2">
+                  <label htmlFor={id} className="block text-xs uppercase tracking-widest font-semibold opacity-70">
+                    {label}
+                  </label>
+                  <input
+                    id={id}
+                    type={type}
+                    value={formData[field]}
+                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                    className="w-full bg-transparent border-b border-[#c9a962]/40 py-3 text-lg focus:outline-none focus:border-[#c9a962] transition-colors placeholder:text-[#f5f0e8]/30"
+                    placeholder={placeholder}
+                    required={field !== "phone"}
+                  />
                 </div>
-                <div>
-                  <span className="font-bold text-lg tracking-wide">PERGONIA</span>
-                  <span className="block text-xs text-white/50">Arquitectura Exterior</span>
-                </div>
-              </div>
-              <p className="text-white/60 text-sm leading-relaxed max-w-sm mb-5">
-                Especialistas en diseño y construcción de albercas y áreas sociales en Torreón y La Comarca Lagunera. Más de 15 años creando espacios extraordinarios.
-              </p>
-              <div className="flex gap-3">
-                <a href="https://facebook.com/pergonia.arquitectura" target="_blank" rel="noopener noreferrer"
-                  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
-                  <Facebook className="w-4 h-4" />
-                </a>
-                <a href="https://instagram.com/pergonia.arquitectura" target="_blank" rel="noopener noreferrer"
-                  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-primary transition-colors">
-                  <Instagram className="w-4 h-4" />
-                </a>
-                <a href={WHATSAPP} target="_blank" rel="noopener noreferrer"
-                  className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-[#25D366] transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
+              ))}
 
-            <div>
-              <h4 className="font-semibold mb-4 text-white/90">Servicios</h4>
-              <ul className="space-y-2.5 text-sm text-white/60">
-                {["Albercas Residenciales","Albercas Comerciales","Áreas Sociales","Pérgolas y Kioscos","Jardines y Riego","Remodelación"].map(s => (
-                  <li key={s}><button onClick={() => scrollTo("servicios")} className="hover:text-white transition-colors">{s}</button></li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4 text-white/90">Contacto</h4>
-              <ul className="space-y-3 text-sm text-white/60">
-                <li className="flex items-start gap-2">
-                  <Phone className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                  <a href={PHONE_LINK} className="hover:text-white transition-colors">{PHONE}</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Mail className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                  <a href={`mailto:${EMAIL}`} className="hover:text-white transition-colors">{EMAIL}</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                  <span>Torreón, Coahuila<br />La Comarca Lagunera, México</span>
-                </li>
-              </ul>
-              <div className="mt-5">
-                <div className="text-xs text-white/40 uppercase tracking-wider mb-2">Horario de atención</div>
-                <div className="text-sm text-white/60">Lunes – Viernes: 8:00 – 18:00</div>
-                <div className="text-sm text-white/60">Sábado: 9:00 – 14:00</div>
+              <div className="space-y-2">
+                <label htmlFor="service" className="block text-xs uppercase tracking-widest font-semibold opacity-70">
+                  Servicio de Interés
+                </label>
+                <select
+                  id="service"
+                  value={formData.service}
+                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                  className="w-full bg-[#4a5e30] border-b border-[#c9a962]/40 py-3 text-lg focus:outline-none focus:border-[#c9a962] transition-colors text-[#f5f0e8]"
+                >
+                  <option value="">Selecciona un servicio...</option>
+                  <option value="alberca_residencial">Alberca Residencial</option>
+                  <option value="alberca_comercial">Alberca Comercial</option>
+                  <option value="area_social">Área Social</option>
+                  <option value="paisajismo">Paisajismo</option>
+                  <option value="remodelacion">Remodelación</option>
+                </select>
               </div>
-            </div>
-          </div>
 
-          <div className="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-white/40">© 2025 Pergonia Arquitectura Exterior. Torreón, Coahuila, México.</p>
-            <p className="text-xs text-white/30">Diseño y construcción de albercas en La Comarca Lagunera</p>
+              <div className="space-y-2">
+                <label htmlFor="message" className="block text-xs uppercase tracking-widest font-semibold opacity-70">
+                  Detalles del Proyecto
+                </label>
+                <textarea
+                  id="message"
+                  rows={4}
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="w-full bg-transparent border-b border-[#c9a962]/40 py-3 text-lg focus:outline-none focus:border-[#c9a962] transition-colors placeholder:text-[#f5f0e8]/30 resize-none"
+                  placeholder="Cuéntanos brevemente sobre la alberca o área social que imaginas..."
+                />
+              </div>
+
+              <div className="pt-8 text-center">
+                <button
+                  type="submit"
+                  disabled={contactMutation.isPending}
+                  className="inline-block px-12 py-4 border border-[#c9a962] text-[#c9a962] text-sm uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300 disabled:opacity-50"
+                >
+                  {contactMutation.isPending ? "Enviando..." : "Enviar Mensaje"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Contact info */}
+          <div className="mt-20 pt-10 border-t border-[#c9a962]/20 grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm opacity-70">
+            <a href={PHONE_LINK} className="hover:opacity-100 transition-opacity">
+              <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">Teléfono</p>
+              <p>{PHONE}</p>
+            </a>
+            <a href={`mailto:${EMAIL}`} className="hover:opacity-100 transition-opacity">
+              <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">Correo</p>
+              <p>{EMAIL}</p>
+            </a>
+            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
+              <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">WhatsApp</p>
+              <p>Escríbenos</p>
+            </a>
           </div>
         </div>
-      </footer>
+      </section>
 
-      {/* WhatsApp floating button */}
-      <a href={WHATSAPP} target="_blank" rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#1fbc59] text-white rounded-full shadow-lg flex items-center justify-center transition-colors hover:scale-110 active:scale-95"
-        aria-label="Contactar por WhatsApp">
-        <MessageCircle className="w-6 h-6" />
-      </a>
+      {/* ── FOOTER ── */}
+      <footer className="bg-[#2d3a1d] text-[#f5f0e8]/50 py-8 px-4 text-center text-xs uppercase tracking-widest">
+        <p>&copy; {new Date().getFullYear()} Pergonia Arquitectura Exterior — Torreón, Coahuila.</p>
+      </footer>
     </div>
   );
 }

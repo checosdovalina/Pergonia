@@ -15,8 +15,8 @@ export function MixBC() {
       `}} />
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-12 py-6 text-[#f5f0e8]">
-        <div className="font-serif text-2xl tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>Pergonia</div>
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-12 py-4 text-[#f5f0e8]">
+        <img src="https://ad3f6dc7-474d-4a56-ab59-a5d260b55e29-00-2pgi7tbpkvq4c.worf.replit.dev/__mockup/images/pergonia_logo.png" alt="Pergonia" className="h-24 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
         <div className="hidden md:flex gap-10 font-sans text-xs uppercase tracking-widest font-semibold">
           <a href="#servicios" className="hover:text-[#c9a962] transition-colors duration-300">Servicios</a>
           <a href="#galeria" className="hover:text-[#c9a962] transition-colors duration-300">Galería</a>
