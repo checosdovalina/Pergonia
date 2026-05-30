@@ -112,7 +112,7 @@ export default function LandingPage() {
             <img
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
-              className="h-36 w-auto"
+              className="h-60 w-auto"
               style={{ filter: "brightness(0) invert(1)" }}
             />
           </button>
