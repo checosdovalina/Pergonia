@@ -38,9 +38,16 @@ const defaultGallery = [
 
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { data: galleryItems = [] } = useQuery<GalleryItem[]>({
     queryKey: ["/api/gallery"],
@@ -105,7 +112,14 @@ export default function LandingPage() {
       />
 
       {/* ── NAVBAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 text-[#f5f0e8]">
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        style={{
+          background: scrolled ? "rgba(42, 54, 28, 0.97)" : "transparent",
+          boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.3)" : "none",
+          color: "#f5f0e8",
+        }}
+      >
         {/* Mobile navbar: logo centered, hamburger right */}
         <div className="flex md:hidden items-center justify-center relative px-4 py-3">
           <button onClick={() => scrollTo("hero")} className="focus:outline-none">
@@ -117,7 +131,8 @@ export default function LandingPage() {
             />
           </button>
           <button
-            className="absolute right-4 top-4 text-[#f5f0e8]"
+            className="absolute right-4 top-4"
+            style={{ color: "#f5f0e8" }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
@@ -135,7 +150,7 @@ export default function LandingPage() {
               style={{ filter: "brightness(0) invert(1)" }}
             />
           </button>
-          <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold">
+          <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold text-[#f5f0e8]">
             {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
               <button
                 key={id}
