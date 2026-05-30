@@ -105,44 +105,54 @@ export default function LandingPage() {
       />
 
       {/* ── NAVBAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-12 py-4 text-[#f5f0e8]">
-        <button onClick={() => scrollTo("hero")} className="focus:outline-none">
-          <img
-            src={pergoniaLogo}
-            alt="Pergonia Arquitectura Exterior"
-            className="h-28 w-auto"
-            style={{ filter: "brightness(0) invert(1)" }}
-          />
-        </button>
-
-        {/* Desktop links */}
-        <div className="hidden md:flex gap-10 text-xs uppercase tracking-widest font-semibold">
-          {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
-            <button
-              key={id}
-              onClick={() => scrollTo(id)}
-              className="hover:text-[#c9a962] transition-colors duration-300 capitalize"
-            >
-              {id === "galeria" ? "Galería" : id.charAt(0).toUpperCase() + id.slice(1)}
-            </button>
-          ))}
+      <nav className="fixed top-0 left-0 right-0 z-50 text-[#f5f0e8]">
+        {/* Mobile navbar: logo centered, hamburger right */}
+        <div className="flex md:hidden items-center justify-center relative px-4 py-3">
+          <button onClick={() => scrollTo("hero")} className="focus:outline-none">
+            <img
+              src={pergoniaLogo}
+              alt="Pergonia Arquitectura Exterior"
+              className="h-36 w-auto"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </button>
+          <button
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#f5f0e8]"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Menú"
+          >
+            {menuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+          </button>
         </div>
 
-        <button
-          onClick={() => scrollTo("contacto")}
-          className="hidden md:block border border-[#c9a962] text-[#c9a962] px-5 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
-        >
-          Cotización
-        </button>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden text-[#f5f0e8]"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menú"
-        >
-          {menuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-        </button>
+        {/* Desktop navbar */}
+        <div className="hidden md:flex justify-between items-center px-12 py-4">
+          <button onClick={() => scrollTo("hero")} className="focus:outline-none">
+            <img
+              src={pergoniaLogo}
+              alt="Pergonia Arquitectura Exterior"
+              className="h-28 w-auto"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </button>
+          <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold">
+            {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
+              <button
+                key={id}
+                onClick={() => scrollTo(id)}
+                className="hover:text-[#c9a962] transition-colors duration-300"
+              >
+                {id === "galeria" ? "Galería" : id.charAt(0).toUpperCase() + id.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => scrollTo("contacto")}
+            className="border border-[#c9a962] text-[#c9a962] px-5 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
+          >
+            Cotización
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu */}
