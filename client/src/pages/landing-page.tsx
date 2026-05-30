@@ -117,7 +117,7 @@ export default function LandingPage() {
             />
           </button>
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#f5f0e8]"
+            className="absolute right-4 top-4 text-[#f5f0e8]"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
