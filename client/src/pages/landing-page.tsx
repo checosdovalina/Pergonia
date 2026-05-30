@@ -120,18 +120,20 @@ export default function LandingPage() {
           color: "#f5f0e8",
         }}
       >
-        {/* Mobile navbar: logo centered, hamburger right */}
+        {/* Mobile navbar: logo centered (hidden when scrolled), hamburger right */}
         <div className="flex md:hidden items-center justify-center relative px-4 py-3">
-          <button onClick={() => scrollTo("hero")} className="focus:outline-none">
-            <img
-              src={pergoniaLogo}
-              alt="Pergonia Arquitectura Exterior"
-              className="h-24 w-auto"
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
-          </button>
+          {!scrolled && (
+            <button onClick={() => scrollTo("hero")} className="focus:outline-none">
+              <img
+                src={pergoniaLogo}
+                alt="Pergonia Arquitectura Exterior"
+                className="h-24 w-auto"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+            </button>
+          )}
           <button
-            className="absolute right-4 top-4"
+            className={`${scrolled ? "static" : "absolute right-4 top-4"} ml-auto`}
             style={{ color: "#f5f0e8" }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
@@ -147,7 +149,7 @@ export default function LandingPage() {
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: "56px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "80px" }}
             />
           </button>
           <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold text-[#f5f0e8]">
