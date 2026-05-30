@@ -126,7 +126,7 @@ export default function LandingPage() {
             <img
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
-              className="h-60 w-auto"
+              className="h-24 w-auto"
               style={{ filter: "brightness(0) invert(1)" }}
             />
           </button>
@@ -146,8 +146,8 @@ export default function LandingPage() {
             <img
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
-              className="h-28 w-auto"
-              style={{ filter: "brightness(0) invert(1)" }}
+              className="w-auto transition-all duration-300"
+              style={{ filter: "brightness(0) invert(1)", height: scrolled ? "48px" : "80px" }}
             />
           </button>
           <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold text-[#f5f0e8]">
@@ -187,7 +187,7 @@ export default function LandingPage() {
       )}
 
       {/* ── HERO ── */}
-      <section id="hero" className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      <section id="hero" className="relative h-screen w-full flex items-center justify-center overflow-hidden pt-28 md:pt-0">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1600"
