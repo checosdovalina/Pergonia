@@ -893,6 +893,28 @@ export const insertPageContentSchema = createInsertSchema(pageContent).omit({
 export type PageContent = typeof pageContent.$inferSelect;
 export type InsertPageContent = z.infer<typeof insertPageContentSchema>;
 
+// Services Catalog schema
+export const services = pgTable("services", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull().default("albercas"), // albercas, pergolas, jardines, areas_sociales, remodelacion, otro
+  description: text("description"),
+  basePrice: decimal("base_price", { precision: 12, scale: 2 }),
+  unit: text("unit").default("proyecto"), // proyecto, m2, ml
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertServiceSchema = createInsertSchema(services).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Service = typeof services.$inferSelect;
+export type InsertService = z.infer<typeof insertServiceSchema>;
+
 // Session schema (para manejar las sesiones de connect-pg-simple)
 export const session = pgTable("session", {
   sid: varchar("sid").primaryKey(),

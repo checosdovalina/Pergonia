@@ -2625,6 +2625,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Services Catalog routes
+  app.get("/api/services", async (req, res) => {
+    try {
+      const { category } = req.query;
+      const items = category
+        ? await storage.getServicesByCategory(category as string)
+        : await storage.getServices();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.get("/api/services/:id", async (req, res) => {
+    try {
+      const item = await storage.getService(parseInt(req.params.id));
+      if (!item) return res.status(404).json({ message: "Service not found" });
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.post("/api/services", isAuthenticated, async (req, res) => {
+    try {
+      const { insertServiceSchema } = await import("@shared/schema");
+      const data = insertServiceSchema.parse(req.body);
+      const item = await storage.createService(data);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.put("/api/services/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { insertServiceSchema } = await import("@shared/schema");
+      const data = insertServiceSchema.partial().parse(req.body);
+      const item = await storage.updateService(parseInt(req.params.id), data);
+      if (!item) return res.status(404).json({ message: "Service not found" });
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
+  app.delete("/api/services/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteService(parseInt(req.params.id));
+      if (!deleted) return res.status(404).json({ message: "Service not found" });
+      res.json({ message: "Eliminado exitosamente" });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  });
+
   // Public contact form (creates a lead)
   app.post("/api/contact", async (req, res) => {
     try {

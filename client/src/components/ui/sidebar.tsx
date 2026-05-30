@@ -19,6 +19,7 @@ import {
   Clipboard,
   DollarSign,
   TrendingUp,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +68,7 @@ export function Sidebar({ className }: SidebarProps) {
       label: "Sitio Web",
       links: [
         { name: "Galería de Proyectos", path: "/dashboard/gallery", icon: <Image className="w-4 h-4" /> },
+        { name: "Catálogo de Servicios", path: "/dashboard/services", icon: <Layers className="w-4 h-4" /> },
         { name: "Contenido del Sitio", path: "/dashboard/content", icon: <FileEdit className="w-4 h-4" /> },
       ],
     },

@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting, leads, Lead, InsertLead, galleryItems, GalleryItem, InsertGalleryItem, pageContent, PageContent, InsertPageContent } from "@shared/schema";
+import { users, type User, type InsertUser, InsertClient, Client, clients, Project, projects, InsertProject, Quote, quotes, InsertQuote, ServiceOrder, serviceOrders, InsertServiceOrder, Staff, staff, InsertStaff, Activity, activities, InsertActivity, subcontractors, Subcontractor, InsertSubcontractor, invoices, Invoice, InsertInvoice, suppliers, Supplier, InsertSupplier, payments, Payment, InsertPayment, purchaseOrders, PurchaseOrder, InsertPurchaseOrder, purchaseOrderItems, PurchaseOrderItem, InsertPurchaseOrderItem, extendedInsertPurchaseOrderItemSchema, settings, Setting, InsertSetting, leads, Lead, InsertLead, galleryItems, GalleryItem, InsertGalleryItem, pageContent, PageContent, InsertPageContent, services, Service, InsertService } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { db } from "./db";
@@ -137,6 +137,14 @@ export interface IStorage {
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
   updateGalleryItem(id: number, item: Partial<InsertGalleryItem>): Promise<GalleryItem | undefined>;
   deleteGalleryItem(id: number): Promise<boolean>;
+
+  // Services Catalog methods
+  getServices(): Promise<Service[]>;
+  getService(id: number): Promise<Service | undefined>;
+  getServicesByCategory(category: string): Promise<Service[]>;
+  createService(service: InsertService): Promise<Service>;
+  updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
+  deleteService(id: number): Promise<boolean>;
 
   // Page Content methods
   getPageContents(): Promise<PageContent[]>;
@@ -1421,6 +1429,61 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Services Catalog methods
+  async getServices(): Promise<Service[]> {
+    try {
+      return await db.select().from(services).orderBy(services.displayOrder, services.name);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      return [];
+    }
+  }
+
+  async getService(id: number): Promise<Service | undefined> {
+    try {
+      const [item] = await db.select().from(services).where(eq(services.id, id));
+      return item || undefined;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  async getServicesByCategory(category: string): Promise<Service[]> {
+    try {
+      return await db.select().from(services).where(eq(services.category, category)).orderBy(services.displayOrder);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async createService(service: InsertService): Promise<Service> {
+    try {
+      const [newItem] = await db.insert(services).values(service).returning();
+      return newItem;
+    } catch (error) {
+      console.error("Error creating service:", error);
+      throw error;
+    }
+  }
+
+  async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> {
+    try {
+      const [updated] = await db.update(services).set(service).where(eq(services.id, id)).returning();
+      return updated || undefined;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  async deleteService(id: number): Promise<boolean> {
+    try {
+      await db.delete(services).where(eq(services.id, id));
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   // Page Content methods
   async getPageContents(): Promise<PageContent[]> {
     try {
@@ -1650,6 +1713,14 @@ export class MemStorage implements IStorage {
   async createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem> { throw new Error("Not implemented"); }
   async updateGalleryItem(id: number, item: Partial<InsertGalleryItem>): Promise<GalleryItem | undefined> { return undefined; }
   async deleteGalleryItem(id: number): Promise<boolean> { return false; }
+
+  // Services Catalog methods
+  async getServices(): Promise<Service[]> { return []; }
+  async getService(id: number): Promise<Service | undefined> { return undefined; }
+  async getServicesByCategory(category: string): Promise<Service[]> { return []; }
+  async createService(service: InsertService): Promise<Service> { throw new Error("Not implemented"); }
+  async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> { return undefined; }
+  async deleteService(id: number): Promise<boolean> { return false; }
 
   // Page Content methods
   async getPageContents(): Promise<PageContent[]> { return []; }

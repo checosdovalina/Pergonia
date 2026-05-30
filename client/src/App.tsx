@@ -28,6 +28,7 @@ import Leads from "@/pages/leads";
 import AdminGallery from "@/pages/admin-gallery";
 import AdminContent from "@/pages/admin-content";
 import AdminUsers from "@/pages/admin-users";
+import AdminServices from "@/pages/admin-services";
 
 function Router() {
   return (
@@ -55,6 +56,7 @@ function Router() {
       <ProtectedRoute path="/dashboard/gallery" component={AdminGallery} />
       <ProtectedRoute path="/dashboard/content" component={AdminContent} />
       <ProtectedRoute path="/dashboard/users" component={AdminUsers} />
+      <ProtectedRoute path="/dashboard/services" component={AdminServices} />
       <Route component={NotFound} />
     </Switch>
   );
