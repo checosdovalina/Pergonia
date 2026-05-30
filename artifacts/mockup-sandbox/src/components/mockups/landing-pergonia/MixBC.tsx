@@ -14,6 +14,20 @@ export function MixBC() {
         }
       `}} />
 
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-12 py-6 text-[#f5f0e8]">
+        <div className="font-serif text-2xl tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>Pergonia</div>
+        <div className="hidden md:flex gap-10 font-sans text-xs uppercase tracking-widest font-semibold">
+          <a href="#servicios" className="hover:text-[#c9a962] transition-colors duration-300">Servicios</a>
+          <a href="#galeria" className="hover:text-[#c9a962] transition-colors duration-300">Galería</a>
+          <a href="#nosotros" className="hover:text-[#c9a962] transition-colors duration-300">Nosotros</a>
+          <a href="#contacto" className="hover:text-[#c9a962] transition-colors duration-300">Contacto</a>
+        </div>
+        <a href="#contacto" className="hidden md:block border border-[#c9a962] text-[#c9a962] px-5 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300">
+          Cotización
+        </a>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
