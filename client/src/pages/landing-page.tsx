@@ -147,7 +147,7 @@ export default function LandingPage() {
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: scrolled ? "48px" : "80px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "56px" }}
             />
           </button>
           <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold text-[#f5f0e8]">
