@@ -463,7 +463,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           {/* Client Selection - First Step */}
           <FormItem>
             <div className="flex items-center justify-between">
-              <FormLabel>Client</FormLabel>
+              <FormLabel>Cliente</FormLabel>
               <Button
                 type="button"
                 variant="outline"
@@ -472,7 +472,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                 className="h-8 px-2"
               >
                 <Users className="h-3 w-3 mr-1" />
-                New Client
+                Nuevo Cliente
               </Button>
             </div>
             <Select
@@ -485,7 +485,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
               value={selectedClientId?.toString() || ""}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a client first" />
+                <SelectValue placeholder="Selecciona un cliente primero" />
               </SelectTrigger>
               <SelectContent>
                 {Array.isArray(clients) && clients.map((client: any) => (
@@ -504,7 +504,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between">
-                  <FormLabel>Project</FormLabel>
+                  <FormLabel>Proyecto</FormLabel>
                   <Button
                     type="button"
                     variant="outline"
@@ -514,7 +514,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     className="h-8 px-2"
                   >
                     <FolderPlus className="h-3 w-3 mr-1" />
-                    New Project
+                    Nuevo Proyecto
                   </Button>
                 </div>
                 <Select
@@ -526,10 +526,10 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     <SelectTrigger>
                       <SelectValue placeholder={
                         !selectedClientId 
-                          ? "Select a client first" 
+                          ? "Selecciona un cliente primero" 
                           : filteredProjects.length === 0
-                          ? "No projects available for this client"
-                          : "Select a project"
+                          ? "No hay proyectos para este cliente"
+                          : "Selecciona un proyecto"
                       } />
                     </SelectTrigger>
                   </FormControl>
@@ -553,24 +553,24 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="projectType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Project Type</FormLabel>
+                <FormLabel>Tipo de Proyecto</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select project type" />
+                      <SelectValue placeholder="Selecciona tipo de proyecto" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="commercial">Commercial</SelectItem>
+                    <SelectItem value="residential">Residencial</SelectItem>
+                    <SelectItem value="commercial">Comercial</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
                 <div className="text-xs text-gray-500 mt-1">
-                  Different modules and pricing will be available based on project type
+                  Los módulos disponibles varían según el tipo de proyecto
                 </div>
               </FormItem>
             )}
@@ -592,7 +592,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="totalEstimate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Estimate ($)</FormLabel>
+                <FormLabel>Total Estimado (MXN)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -611,8 +611,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         {/* Optional Comments for Scope of Work */}
         <div className="space-y-4">
           <div className="border rounded-lg p-4">
-            <h3 className="text-md font-semibold text-gray-800 mb-3">Optional Work Comments</h3>
-            <p className="text-xs text-gray-500 mb-3">Select standard comments to include in the scope of work</p>
+            <h3 className="text-md font-semibold text-gray-800 mb-3">Comentarios Opcionales</h3>
+            <p className="text-xs text-gray-500 mb-3">Selecciona comentarios estándar para incluir en el alcance del trabajo</p>
             
             <div className="grid gap-3">
               <FormField
@@ -738,17 +738,17 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
           name="scopeOfWork"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Scope of Work</FormLabel>
+              <FormLabel>Alcance del Trabajo</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe in detail the scope of work to be performed..."
+                  placeholder="Describe detalladamente el alcance del trabajo a realizar..."
                   className="min-h-[120px]"
                   {...field}
                 />
               </FormControl>
               <FormMessage />
               <div className="text-xs text-gray-500 mt-1">
-                You can use bullet points with "•", "-", "*", or "✓" to create lists
+                Puedes usar viñetas con "•", "-", "*", o "✓" para crear listas
               </div>
             </FormItem>
           )}
@@ -757,8 +757,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         {/* Service Type Options */}
         <div className="space-y-4">
           <div>
-            <FormLabel className="text-base font-medium">Service Type</FormLabel>
-            <p className="text-sm text-muted-foreground">Select which areas will be painted</p>
+            <FormLabel className="text-base font-medium">Tipo de Servicio</FormLabel>
+            <p className="text-sm text-muted-foreground">Selecciona las áreas a trabajar</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <FormField
@@ -775,7 +775,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   <div className="space-y-1 leading-none">
                     <FormLabel>Interior</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Indoor painting services
+                      Trabajos en interiores
                     </p>
                   </div>
                 </FormItem>
@@ -796,7 +796,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                   <div className="space-y-1 leading-none">
                     <FormLabel>Exterior</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Outdoor painting services
+                      Trabajos en exteriores
                     </p>
                   </div>
                 </FormItem>
@@ -815,9 +815,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Special Requirements</FormLabel>
+                    <FormLabel>Requerimientos Especiales</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Custom work and special items
+                      Trabajo personalizado o partidas especiales
                     </p>
                   </div>
                 </FormItem>
@@ -830,8 +830,8 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
         {form.watch("isExterior") && (
           <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
             <div>
-              <FormLabel className="text-base font-medium">Labor Breakdown - Exterior</FormLabel>
-              <p className="text-sm text-muted-foreground">Select and price specific exterior components</p>
+              <FormLabel className="text-base font-medium">Desglose de Mano de Obra - Exterior</FormLabel>
+              <p className="text-sm text-muted-foreground">Selecciona y asigna precio a componentes exteriores</p>
             </div>
             
             {/* Boxes (Unified Soffit, Facia, Gutters) */}
@@ -5294,7 +5294,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="validUntil"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Valid Until</FormLabel>
+                <FormLabel>Válida Hasta</FormLabel>
                 <Popover open={validUntilOpen} onOpenChange={setValidUntilOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -5337,7 +5337,7 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             name="sentDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Send Date</FormLabel>
+                <FormLabel>Fecha de Envío</FormLabel>
                 <Popover open={sentDateOpen} onOpenChange={setSentDateOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -6289,17 +6289,17 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
             variant="outline"
             onClick={onSuccess}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending}
           >
             {mutation.isPending
-              ? "Saving..."
+              ? "Guardando..."
               : initialData?.id
-              ? "Update Quote"
-              : "Create Quote"}
+              ? "Actualizar Cotización"
+              : "Crear Cotización"}
           </Button>
         </div>
       </form>
@@ -6308,9 +6308,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       <Dialog open={showClientForm} onOpenChange={setShowClientForm}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>New Client</DialogTitle>
+            <DialogTitle>Nuevo Cliente</DialogTitle>
             <DialogDescription>
-              Complete the form to register a new client
+              Completa el formulario para registrar un nuevo cliente
             </DialogDescription>
           </DialogHeader>
           <ClientForm onSuccess={handleClientCreated} />
@@ -6321,9 +6321,9 @@ export function SimpleQuoteForm({ initialData, onSuccess }: SimpleQuoteFormProps
       <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
+            <DialogTitle>Crear Nuevo Proyecto</DialogTitle>
             <DialogDescription>
-              Add a new project for the selected client
+              Agrega un proyecto para el cliente seleccionado
             </DialogDescription>
           </DialogHeader>
           <ProjectForm 

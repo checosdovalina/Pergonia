@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileDown, Printer, Eye, Check, X, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import logoPath from "@assets/JPG_1_1764824638626.jpg";
+import logoPath from "@assets/pergonia_logo_transparent.png";
 import jsPDF from "jspdf";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -46,15 +46,15 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
-      onOpenChange(false); // Cerrar el diálogo para forzar re-render
+      onOpenChange(false);
       toast({
-        title: "Status Updated",
-        description: "Quote status has been updated successfully.",
+        title: "Estatus actualizado",
+        description: "El estatus de la cotización fue actualizado exitosamente.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update Failed",
+        title: "Error al actualizar",
         description: error.message,
         variant: "destructive",
       });
@@ -162,18 +162,17 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       return res.json();
     },
     onSuccess: () => {
-      // Update quote status to converted
       updateStatusMutation.mutate("converted");
       queryClient.invalidateQueries({ queryKey: ["/api/service-orders"] });
-      onOpenChange(false); // Cerrar el diálogo
+      onOpenChange(false);
       toast({
-        title: "Service Order Created",
-        description: "Quote has been converted to a service order successfully.",
+        title: "Orden de servicio creada",
+        description: "La cotización fue convertida a orden de servicio exitosamente.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Conversion Failed",
+        title: "Error al convertir",
         description: error.message,
         variant: "destructive",
       });
@@ -202,16 +201,12 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "draft":
-        return "Draft";
-      case "sent":
-        return "Sent";
-      case "approved":
-        return "Approved";
-      case "rejected":
-        return "Rejected";
-      default:
-        return status;
+      case "draft":     return "Borrador";
+      case "sent":      return "Enviada";
+      case "approved":  return "Aprobada";
+      case "rejected":  return "Rechazada";
+      case "converted": return "Convertida";
+      default:          return status;
     }
   };
 
@@ -288,27 +283,26 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       // Company Header (next to logo)
       pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
-      pdf.text("DOVALINA PRO PAINTERS", margin + 22, yPosition + 6);
+      pdf.text("PERGONIA — ARQUITECTURA EXTERIOR", margin + 22, yPosition + 6);
       
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      pdf.text("3731 Aster Drive", margin + 22, yPosition + 11);
-      pdf.text("Charlotte, N.C. 28227", margin + 22, yPosition + 15);
-      pdf.text("704-506-9741", margin + 22, yPosition + 19);
-      pdf.text("contact@dovalinapropainters.com", margin + 22, yPosition + 23);
+      pdf.text("Torreón, Coahuila, México", margin + 22, yPosition + 11);
+      pdf.text("contacto@pergonia.mx", margin + 22, yPosition + 15);
+      pdf.text("www.pergonia.mx", margin + 22, yPosition + 19);
 
       // Quote number and details (right aligned)
       const rightX = pageWidth - margin;
       pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
-      pdf.text(`Quote #${quote.id}`, rightX, yPosition + 6, { align: 'right' });
+      pdf.text(`Cotización #${quote.id}`, rightX, yPosition + 6, { align: 'right' });
       
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      pdf.text(`Date: ${format(new Date(quote.createdAt), "MMMM do, yyyy")}`, rightX, yPosition + 11, { align: 'right' });
-      pdf.text(`Status: ${getStatusLabel(quote.status)}`, rightX, yPosition + 15, { align: 'right' });
+      pdf.text(`Fecha: ${format(new Date(quote.createdAt), "dd/MM/yyyy")}`, rightX, yPosition + 11, { align: 'right' });
+      pdf.text(`Estatus: ${getStatusLabel(quote.status)}`, rightX, yPosition + 15, { align: 'right' });
       if (quote.validUntil) {
-        pdf.text(`Valid until: ${format(new Date(quote.validUntil), "MMMM do, yyyy")}`, rightX, yPosition + 19, { align: 'right' });
+        pdf.text(`Válida hasta: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}`, rightX, yPosition + 19, { align: 'right' });
       }
 
       // Line separator
@@ -362,19 +356,19 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       
       pdf.setFontSize(11);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Project Information", leftColumnX + 3, yPosition + 5.5);
+      pdf.text("Información del Proyecto", leftColumnX + 3, yPosition + 5.5);
       
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
       let projectY = yPosition + 13;
       if (project) {
-        const projectNameLines = pdf.splitTextToSize(`Name: ${project.title}`, boxWidth - 6);
+        const projectNameLines = pdf.splitTextToSize(`Nombre: ${project.title}`, boxWidth - 6);
         projectNameLines.forEach((line: string) => {
           pdf.text(line, leftColumnX + 3, projectY);
           projectY += 4;
         });
         
-        const addressLines = pdf.splitTextToSize(`Address: ${project.address || "N/A"}`, boxWidth - 6);
+        const addressLines = pdf.splitTextToSize(`Dirección: ${project.address || "N/A"}`, boxWidth - 6);
         addressLines.forEach((line: string) => {
           pdf.text(line, leftColumnX + 3, projectY);
           projectY += 4;
@@ -389,13 +383,13 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       
       pdf.setFontSize(11);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Client Information", rightColumnX + 3, yPosition + 5.5);
+      pdf.text("Información del Cliente", rightColumnX + 3, yPosition + 5.5);
       
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
       let clientY = yPosition + 13;
       if (client) {
-        pdf.text(`Name: ${client.name}`, rightColumnX + 3, clientY);
+        pdf.text(`Nombre: ${client.name}`, rightColumnX + 3, clientY);
         clientY += 4;
         if (client.email) {
           const emailLines = pdf.splitTextToSize(`Email: ${client.email}`, boxWidth - 6);
@@ -405,11 +399,11 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
           });
         }
         if (client.phone) {
-          pdf.text(`Phone: ${client.phone}`, rightColumnX + 3, clientY);
+          pdf.text(`Teléfono: ${client.phone}`, rightColumnX + 3, clientY);
           clientY += 4;
         }
         if (client.address) {
-          const addressLines = pdf.splitTextToSize(`Address: ${client.address}`, boxWidth - 6);
+          const addressLines = pdf.splitTextToSize(`Dirección: ${client.address}`, boxWidth - 6);
           addressLines.forEach((line: string) => {
             pdf.text(line, rightColumnX + 3, clientY);
             clientY += 4;
@@ -427,7 +421,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         
         pdf.setFontSize(12);
         pdf.setFont("helvetica", "bold");
-        pdf.text("Scope of Work", margin + 3, yPosition + 5.5);
+        pdf.text("Alcance del Trabajo", margin + 3, yPosition + 5.5);
         yPosition += 12;
 
         pdf.setFontSize(9);
@@ -479,7 +473,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         
         pdf.setFontSize(12);
         pdf.setFont("helvetica", "bold");
-        pdf.text("Project Description", margin + 3, yPosition + 5.5);
+        pdf.text("Descripción del Proyecto", margin + 3, yPosition + 5.5);
         yPosition += 12;
 
         pdf.setFontSize(9);
@@ -503,7 +497,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(12);
-        pdf.text("Project Images", margin + 3, yPosition + 5.5);
+        pdf.text("Imágenes del Proyecto", margin + 3, yPosition + 5.5);
         yPosition += 15;
 
         // Add each image
@@ -525,7 +519,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
               pdf.rect(margin, yPosition, pageWidth - (2 * margin), 8, 'F');
               pdf.setFont("helvetica", "bold");
               pdf.setFontSize(12);
-              pdf.text("Project Images (continued)", margin + 3, yPosition + 5.5);
+              pdf.text("Imágenes del Proyecto (continuación)", margin + 3, yPosition + 5.5);
               yPosition += 15;
             }
 
@@ -572,8 +566,8 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
       pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Total Project Cost:", margin, yPosition);
-      pdf.text(`$${quote.totalEstimate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, rightX, yPosition, { align: 'right' });
+      pdf.text("Costo Total del Proyecto:", margin, yPosition);
+      pdf.text(`$${Number(quote.totalEstimate).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`, rightX, yPosition, { align: 'right' });
 
       yPosition += 15;
 
@@ -587,9 +581,9 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(100, 100, 100);
-      pdf.text("Thank you for choosing Dovalina Pro Painters!", margin, yPosition);
+      pdf.text("¡Gracias por confiar en Pergonia — Arquitectura Exterior!", margin, yPosition);
       yPosition += 5;
-      pdf.text("This quote is valid for 30 days from the date above.", margin, yPosition);
+      pdf.text("Esta cotización tiene una vigencia de 30 días a partir de la fecha indicada.", margin, yPosition);
 
       // Save the PDF
       const fileName = `Quote-${quote.id}-${project?.title?.substring(0, 30) || 'Project'}.pdf`;
@@ -597,8 +591,8 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({
-        title: "PDF Generation Failed",
-        description: "There was an error generating the PDF. Please try again.",
+        title: "Error al generar PDF",
+        description: "Hubo un error al generar el PDF. Por favor intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -612,7 +606,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold">
-              Quote #{quote.id}
+              Cotización #{quote.id}
             </DialogTitle>
             <div className="flex items-center space-x-2">
               <Badge className={getStatusColor(quote.status)}>
@@ -627,7 +621,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                     onClick={() => updateStatusMutation.mutate("sent")}
                     disabled={updateStatusMutation.isPending}
                   >
-                    Send to Client
+                    Enviar al Cliente
                   </Button>
                 )}
                 
@@ -641,7 +635,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                       className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
                     >
                       <Check className="h-4 w-4 mr-1" />
-                      Approve
+                      Aprobar
                     </Button>
                     <Button
                       variant="outline"
@@ -651,7 +645,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                       className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
                     >
                       <X className="h-4 w-4 mr-1" />
-                      Reject
+                      Rechazar
                     </Button>
                   </>
                 )}
@@ -665,11 +659,10 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                     className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
                   >
                     <ArrowRight className="h-4 w-4 mr-1" />
-                    {convertToServiceOrderMutation.isPending ? "Converting..." : "Convert to Service Order"}
+                    {convertToServiceOrderMutation.isPending ? "Convirtiendo..." : "Convertir a Orden de Servicio"}
                   </Button>
                 )}
 
-                {/* Standard action buttons */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -677,7 +670,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                   disabled={isGeneratingPDF}
                 >
                   <FileDown className="h-4 w-4 mr-1" />
-                  {isGeneratingPDF ? "Generating..." : "PDF"}
+                  {isGeneratingPDF ? "Generando..." : "PDF"}
                 </Button>
                 {onEdit && (
                   <Button
@@ -686,7 +679,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                     onClick={() => onEdit(quote)}
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    Edit
+                    Editar
                   </Button>
                 )}
               </div>
@@ -701,26 +694,26 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
               <div className="flex items-start space-x-4">
                 <img 
                   src={logoPath} 
-                  alt="Dovalina Pro Painters Logo" 
-                  className="h-16 w-16 object-contain"
+                  alt="Pergonia Logo" 
+                  className="h-16 w-auto object-contain"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">DOVALINA PRO PAINTERS</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">PERGONIA</h1>
+                  <p className="text-sm text-[#4a5e30] font-medium">Arquitectura Exterior</p>
                   <div className="mt-2 text-sm text-gray-600 space-y-1">
-                    <p>3731 Aster Drive</p>
-                    <p>Charlotte, N.C. 28227</p>
-                    <p>704-506-9741</p>
-                    <p>contact@dovalinapropainters.com</p>
+                    <p>Torreón, Coahuila, México</p>
+                    <p>contacto@pergonia.mx</p>
+                    <p>www.pergonia.mx</p>
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <h2 className="text-2xl font-bold text-gray-900">Quote #{quote.id}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Cotización #{quote.id}</h2>
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
-                  <p><span className="font-medium">Date:</span> {format(new Date(quote.createdAt), "MMMM do, yyyy")}</p>
-                  <p><span className="font-medium">Status:</span> <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getStatusColor(quote.status)}`}>{getStatusLabel(quote.status)}</span></p>
+                  <p><span className="font-medium">Fecha:</span> {format(new Date(quote.createdAt), "dd/MM/yyyy")}</p>
+                  <p><span className="font-medium">Estatus:</span> <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getStatusColor(quote.status)}`}>{getStatusLabel(quote.status)}</span></p>
                   {quote.validUntil && (
-                    <p><span className="font-medium">Valid until:</span> {format(new Date(quote.validUntil), "MMMM do, yyyy")}</p>
+                    <p><span className="font-medium">Válida hasta:</span> {format(new Date(quote.validUntil), "dd/MM/yyyy")}</p>
                   )}
                 </div>
               </div>
@@ -730,28 +723,28 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
           {/* Project and Client Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Proyecto</h3>
               <div className="space-y-3">
                 <div>
-                  <span className="font-medium text-gray-700">Name:</span>
+                  <span className="font-medium text-gray-700">Nombre:</span>
                   <p className="text-gray-900">{project?.title || "N/A"}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Address:</span>
+                  <span className="font-medium text-gray-700">Dirección:</span>
                   <p className="text-gray-900">{project?.address || "N/A"}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Description:</span>
+                  <span className="font-medium text-gray-700">Descripción:</span>
                   <p className="text-gray-900">{project?.description || "N/A"}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Cliente</h3>
               <div className="space-y-3">
                 <div>
-                  <span className="font-medium text-gray-700">Name:</span>
+                  <span className="font-medium text-gray-700">Nombre:</span>
                   <p className="text-gray-900">{client?.name || "N/A"}</p>
                 </div>
                 <div>
@@ -759,11 +752,11 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                   <p className="text-gray-900">{client?.email || "N/A"}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Phone:</span>
+                  <span className="font-medium text-gray-700">Teléfono:</span>
                   <p className="text-gray-900">{client?.phone || "N/A"}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Address:</span>
+                  <span className="font-medium text-gray-700">Dirección:</span>
                   <p className="text-gray-900">{client?.address || "N/A"}</p>
                 </div>
               </div>
@@ -772,7 +765,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
           {/* Scope of Work */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Scope of Work</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Alcance del Trabajo</h3>
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-sm text-gray-900 leading-relaxed">
                 {formatText(quote.scopeOfWork)}
@@ -783,9 +776,9 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
           {/* Total */}
           <div className="border-t pt-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">Total Project Cost:</h3>
-              <span className="text-2xl font-bold text-green-600">
-                ${quote.totalEstimate.toLocaleString()}
+              <h3 className="text-xl font-bold text-gray-900">Costo Total del Proyecto:</h3>
+              <span className="text-2xl font-bold text-[#4a5e30]">
+                ${Number(quote.totalEstimate || 0).toLocaleString("es-MX")} MXN
               </span>
             </div>
           </div>
@@ -793,7 +786,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
           {/* Notes */}
           {quote.notes && (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Internal Notes</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Notas Internas</h3>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-sm text-gray-700">{quote.notes}</p>
               </div>
