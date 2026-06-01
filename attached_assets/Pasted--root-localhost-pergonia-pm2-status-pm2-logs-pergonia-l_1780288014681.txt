@@ -1,0 +1,120 @@
+[root@localhost pergonia]# pm2 status
+pm2 logs pergonia --lines 20
+curl http://localhost:3000
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ comite-app         │ fork     │ 14   │ stopped   │ 0%       │ 0b       │
+│ 14 │ courtflow          │ fork     │ 11   │ online    │ 0%       │ 230.5mb  │
+│ 12 │ courtflow-api      │ fork     │ 4    │ stopped   │ 0%       │ 0b       │
+│ 6  │ geodoc             │ fork     │ 8    │ stopped   │ 0%       │ 0b       │
+│ 16 │ pergonia           │ fork     │ 10   │ online    │ 0%       │ 64.7mb   │
+│ 4  │ sheltiescrm        │ fork     │ 20   │ online    │ 0%       │ 62.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 20 lines for [pergonia] process (change the value with --lines option)
+/root/.pm2/logs/pergonia-error.log last 20 lines:
+16|pergoni | node:events:502
+16|pergoni |       throw er; // Unhandled 'error' event
+16|pergoni |       ^
+16|pergoni | 
+16|pergoni | Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+16|pergoni |     at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+16|pergoni |     at listenInCluster (node:net:1965:12)
+16|pergoni |     at doListen (node:net:2139:7)
+16|pergoni |     at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+16|pergoni | Emitted 'error' event on Server instance at:
+16|pergoni |     at emitErrorNT (node:net:1944:8)
+16|pergoni |     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+16|pergoni |   code: 'EADDRINUSE',
+16|pergoni |   errno: -98,
+16|pergoni |   syscall: 'listen',
+16|pergoni |   address: '0.0.0.0',
+16|pergoni |   port: 5000
+16|pergoni | }
+16|pergoni | 
+16|pergoni | Node.js v20.19.6
+
+/root/.pm2/logs/pergonia-out.log last 20 lines:
+16|pergoni | [db] Connected to local PostgreSQL
+16|pergoni | 
+16|pergoni | > rest-express@1.0.0 start
+16|pergoni | > NODE_ENV=production node dist/index.js
+16|pergoni | 
+16|pergoni | [db] Connected to local PostgreSQL
+16|pergoni | 
+16|pergoni | > rest-express@1.0.0 start
+16|pergoni | > NODE_ENV=production node dist/index.js
+16|pergoni | 
+16|pergoni | [db] Connected to local PostgreSQL
+16|pergoni | 
+16|pergoni | > rest-express@1.0.0 start
+16|pergoni | > NODE_ENV=production node dist/index.js
+16|pergoni | 
+16|pergoni | [db] Connected to local PostgreSQL
+16|pergoni | 
+16|pergoni | > rest-express@1.0.0 start
+16|pergoni | > NODE_ENV=production node dist/index.js
+16|pergoni | 
+
+16|pergonia  | [db] Connected to local PostgreSQL
+16|pergonia  | node:events:502
+16|pergonia  |       throw er; // Unhandled 'error' event
+16|pergonia  |       ^
+16|pergonia  | Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+16|pergonia  |     at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+16|pergonia  |     at listenInCluster (node:net:1965:12)
+16|pergonia  |     at doListen (node:net:2139:7)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+16|pergonia  | Emitted 'error' event on Server instance at:
+16|pergonia  |     at emitErrorNT (node:net:1944:8)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+16|pergonia  |   code: 'EADDRINUSE',
+16|pergonia  |   errno: -98,
+16|pergonia  |   syscall: 'listen',
+16|pergonia  |   address: '0.0.0.0',
+16|pergonia  |   port: 5000
+16|pergonia  | }
+16|pergonia  | Node.js v20.19.6
+16|pergonia  | > rest-express@1.0.0 start
+16|pergonia  | > NODE_ENV=production node dist/index.js
+16|pergonia  | [db] Connected to local PostgreSQL
+16|pergonia  | node:events:502
+16|pergonia  |       throw er; // Unhandled 'error' event
+16|pergonia  |       ^
+16|pergonia  | Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+16|pergonia  |     at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+16|pergonia  |     at listenInCluster (node:net:1965:12)
+16|pergonia  |     at doListen (node:net:2139:7)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+16|pergonia  | Emitted 'error' event on Server instance at:
+16|pergonia  |     at emitErrorNT (node:net:1944:8)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+16|pergonia  |   code: 'EADDRINUSE',
+16|pergonia  |   errno: -98,
+16|pergonia  |   syscall: 'listen',
+16|pergonia  |   address: '0.0.0.0',
+16|pergonia  |   port: 5000
+16|pergonia  | }
+16|pergonia  | Node.js v20.19.6
+16|pergonia  | > rest-express@1.0.0 start
+16|pergonia  | > NODE_ENV=production node dist/index.js
+16|pergonia  | [db] Connected to local PostgreSQL
+16|pergonia  | node:events:502
+16|pergonia  |       throw er; // Unhandled 'error' event
+16|pergonia  |       ^
+16|pergonia  | Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+16|pergonia  |     at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+16|pergonia  |     at listenInCluster (node:net:1965:12)
+16|pergonia  |     at doListen (node:net:2139:7)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+16|pergonia  | Emitted 'error' event on Server instance at:
+16|pergonia  |     at emitErrorNT (node:net:1944:8)
+16|pergonia  |     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+16|pergonia  |   code: 'EADDRINUSE',
+16|pergonia  |   errno: -98,
+16|pergonia  |   syscall: 'listen',
+16|pergonia  |   address: '0.0.0.0',
+16|pergonia  |   port: 5000
+16|pergonia  | }
+16|pergonia  | Node.js v20.19.6
+1
