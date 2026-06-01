@@ -143,16 +143,22 @@ export default function LandingPage() {
         </div>
 
         {/* Desktop navbar */}
-        <div className="hidden md:flex justify-between items-center px-12 py-4">
-          <button onClick={() => scrollTo("hero")} className="focus:outline-none">
+        <div className="hidden md:flex items-center px-12 py-4 relative">
+          {/* Logo — absoluto para que no afecte el layout del menú */}
+          <button
+            onClick={() => scrollTo("hero")}
+            className="focus:outline-none absolute left-12 top-1/2 -translate-y-1/2 z-10"
+          >
             <img
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: "80px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "120px" }}
             />
           </button>
-          <div className="flex gap-10 text-base uppercase tracking-widest font-bold text-[#f5f0e8]">
+
+          {/* Links — centrados en el ancho total */}
+          <div className="flex-1 flex justify-center gap-10 text-base uppercase tracking-widest font-bold text-[#f5f0e8]">
             {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
               <button
                 key={id}
@@ -163,9 +169,11 @@ export default function LandingPage() {
               </button>
             ))}
           </div>
+
+          {/* Botón Cotización */}
           <button
             onClick={() => scrollTo("contacto")}
-            className="border border-[#c9a962] text-[#c9a962] px-5 py-2 text-base uppercase tracking-widest font-bold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
+            className="border border-[#c9a962] text-[#c9a962] px-5 py-2 text-base uppercase tracking-widest font-bold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300 ml-auto"
           >
             Cotización
           </button>
