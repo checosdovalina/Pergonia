@@ -143,21 +143,21 @@ export default function LandingPage() {
         </div>
 
         {/* Desktop navbar */}
-        <div className="hidden md:flex justify-between items-center px-12 py-4">
+        <div className="hidden md:flex justify-between items-center px-14 py-5">
           <button onClick={() => scrollTo("hero")} className="focus:outline-none">
             <img
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: "80px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "90px" }}
             />
           </button>
-          <div className="flex gap-10 text-xs uppercase tracking-widest font-semibold text-[#f5f0e8]">
+          <div className="flex gap-12 text-sm uppercase tracking-widest font-bold text-[#f5f0e8]">
             {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
               <button
                 key={id}
                 onClick={() => scrollTo(id)}
-                className="hover:text-[#c9a962] transition-colors duration-300"
+                className="hover:text-[#c9a962] transition-colors duration-300 py-2 border-b-2 border-transparent hover:border-[#c9a962]"
               >
                 {id === "galeria" ? "Galería" : id.charAt(0).toUpperCase() + id.slice(1)}
               </button>
@@ -165,7 +165,7 @@ export default function LandingPage() {
           </div>
           <button
             onClick={() => scrollTo("contacto")}
-            className="border border-[#c9a962] text-[#c9a962] px-5 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
+            className="border-2 border-[#c9a962] text-[#c9a962] px-8 py-3 text-sm uppercase tracking-widest font-bold hover:bg-[#c9a962] hover:text-[#4a5e30] transition-colors duration-300"
           >
             Cotización
           </button>
