@@ -1,0 +1,92 @@
+git pull origin main
+npm run build
+pm2 restart pergonia
+sleep 3
+pm2 logs pergonia --lines 10 --nostream
+curl http://localhost:7000
+From https://github.com/checosdovalina/Pergonia
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.14 building for production...
+Browserslist: browsers data (caniuse-lite) is 20 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3114 modules transformed.
+../dist/public/index.html                                         1.20 kB │ gzip:   0.64 kB
+../dist/public/assets/pergonia_logo_transparent-Bc1IGm81.png    706.70 kB
+../dist/public/assets/index-BD3BfnSV.css                         77.51 kB │ gzip:  13.63 kB
+../dist/public/assets/purify.es-CF4_YkFU.js                      21.86 kB │ gzip:   8.62 kB
+../dist/public/assets/index.es-DLPGj2IH.js                      149.98 kB │ gzip:  51.24 kB
+../dist/public/assets/index-CLUxkzBR.js                       2,019.58 kB │ gzip: 584.18 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.69s
+
+  dist/index.js  159.0kb
+
+⚡ Done in 13ms
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [pergonia](ids: [ 17 ])
+[PM2] [pergonia](17) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ comite-app         │ fork     │ 14   │ stopped   │ 0%       │ 0b       │
+│ 14 │ courtflow          │ fork     │ 11   │ online    │ 0%       │ 231.2mb  │
+│ 12 │ courtflow-api      │ fork     │ 4    │ stopped   │ 0%       │ 0b       │
+│ 6  │ geodoc             │ fork     │ 8    │ stopped   │ 0%       │ 0b       │
+│ 17 │ pergonia           │ fork     │ 150  │ online    │ 0%       │ 17.9mb   │
+│ 4  │ sheltiescrm        │ fork     │ 20   │ online    │ 0%       │ 62.3mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 10 lines for [pergonia] process (change the value with --lines option)
+/root/.pm2/logs/pergonia-error.log last 10 lines:
+17|pergoni |     at emitErrorNT (node:net:1944:8)
+17|pergoni |     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+17|pergoni |   code: 'EADDRINUSE',
+17|pergoni |   errno: -98,
+17|pergoni |   syscall: 'listen',
+17|pergoni |   address: '0.0.0.0',
+17|pergoni |   port: 5000
+17|pergoni | }
+17|pergoni | 
+17|pergoni | Node.js v20.19.6
+
+/root/.pm2/logs/pergonia-out.log last 10 lines:
+17|pergoni | > NODE_ENV=production node dist/index.js
+17|pergoni | 
+17|pergoni | [db] Connected to local PostgreSQL
+17|pergoni | 4:35:57 AM [express] serving on port 7000
+17|pergoni | 
+17|pergoni | > rest-express@1.0.0 start
+17|pergoni | > NODE_ENV=production node dist/index.js
+17|pergoni | 
+17|pergoni | [db] Connected to local PostgreSQL
+17|pergoni | 4:38:02 AM [express] serving on port 7000
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Pergonia | Arquitectura Exterior — Torreón, Coahuila</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/assets/index-CLUxkzBR.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BD3BfnSV.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>[root@localhost pergonia]# 
