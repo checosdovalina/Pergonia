@@ -210,8 +210,8 @@ export default function LandingPage() {
           <img
             src={pergoniaLogo}
             alt="Pergonia Arquitectura Exterior"
-            className="mx-auto w-auto"
-            style={{ filter: "brightness(0) invert(1)", height: "500px" }}
+            className="mx-auto w-[80vw] md:w-auto md:h-[500px] object-contain"
+            style={{ filter: "brightness(0) invert(1)" }}
           />
         </div>
       </section>
