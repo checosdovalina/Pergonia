@@ -1,0 +1,65 @@
+[root@localhost pergonia]# dnf install -y nginx
+systemctl start nginx
+systemctl enable nginx
+PostgreSQL common RPMs for RHEL / Rocky Linux /  10 kB/s | 659  B     00:00    
+PostgreSQL 18 for RHEL / Rocky Linux / AlmaLinu 9.2 kB/s | 659  B     00:00    
+PostgreSQL 17 for RHEL / Rocky Linux / AlmaLinu  12 kB/s | 659  B     00:00    
+PostgreSQL 16 for RHEL / Rocky Linux / AlmaLinu  11 kB/s | 659  B     00:00    
+PostgreSQL 15 for RHEL / Rocky Linux / AlmaLinu  12 kB/s | 659  B     00:00    
+PostgreSQL 14 for RHEL / Rocky Linux / AlmaLinu  10 kB/s | 659  B     00:00    
+Package nginx-2:1.20.1-22.el9_6.3.alma.2.x86_64 is already installed.
+Dependencies resolved.
+================================================================================
+ Package             Arch      Version                       Repository    Size
+================================================================================
+Upgrading:
+ nginx               x86_64    2:1.20.1-28.el9_8.2.alma.1    appstream     37 k
+ nginx-core          x86_64    2:1.20.1-28.el9_8.2.alma.1    appstream    568 k
+ nginx-filesystem    noarch    2:1.20.1-28.el9_8.2.alma.1    appstream     10 k
+
+Transaction Summary
+================================================================================
+Upgrade  3 Packages
+
+Total download size: 616 k
+Downloading Packages:
+(1/3): nginx-filesystem-1.20.1-28.el9_8.2.alma. 6.9 kB/s |  10 kB     00:01    
+(2/3): nginx-1.20.1-28.el9_8.2.alma.1.x86_64.rp  24 kB/s |  37 kB     00:01    
+(3/3): nginx-core-1.20.1-28.el9_8.2.alma.1.x86_ 369 kB/s | 568 kB     00:01    
+--------------------------------------------------------------------------------
+Total                                           374 kB/s | 616 kB     00:01     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Running scriptlet: nginx-filesystem-2:1.20.1-28.el9_8.2.alma.1.noarch     1/6 
+  Upgrading        : nginx-filesystem-2:1.20.1-28.el9_8.2.alma.1.noarch     1/6 
+  Upgrading        : nginx-core-2:1.20.1-28.el9_8.2.alma.1.x86_64           2/6 
+  Upgrading        : nginx-2:1.20.1-28.el9_8.2.alma.1.x86_64                3/6 
+  Running scriptlet: nginx-2:1.20.1-28.el9_8.2.alma.1.x86_64                3/6 
+  Running scriptlet: nginx-2:1.20.1-22.el9_6.3.alma.2.x86_64                4/6 
+  Cleanup          : nginx-2:1.20.1-22.el9_6.3.alma.2.x86_64                4/6 
+  Running scriptlet: nginx-2:1.20.1-22.el9_6.3.alma.2.x86_64                4/6 
+  Cleanup          : nginx-core-2:1.20.1-22.el9_6.3.alma.2.x86_64           5/6 
+  Cleanup          : nginx-filesystem-2:1.20.1-22.el9_6.3.alma.2.noarch     6/6 
+  Running scriptlet: nginx-filesystem-2:1.20.1-22.el9_6.3.alma.2.noarch     6/6 
+  Verifying        : nginx-2:1.20.1-28.el9_8.2.alma.1.x86_64                1/6 
+  Verifying        : nginx-2:1.20.1-22.el9_6.3.alma.2.x86_64                2/6 
+  Verifying        : nginx-core-2:1.20.1-28.el9_8.2.alma.1.x86_64           3/6 
+  Verifying        : nginx-core-2:1.20.1-22.el9_6.3.alma.2.x86_64           4/6 
+  Verifying        : nginx-filesystem-2:1.20.1-28.el9_8.2.alma.1.noarch     5/6 
+  Verifying        : nginx-filesystem-2:1.20.1-22.el9_6.3.alma.2.noarch     6/6 
+
+Upgraded:
+  nginx-2:1.20.1-28.el9_8.2.alma.1.x86_64                                       
+  nginx-core-2:1.20.1-28.el9_8.2.alma.1.x86_64                                  
+  nginx-filesystem-2:1.20.1-28.el9_8.2.alma.1.noarch                            
+
+Complete!
+[root@localhost pergonia]# nano /etc/nginx/conf.d/pergonia.conf
+[root@localhost pergonia]# nginx -t && systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+[root@localhost pergonia]# 
