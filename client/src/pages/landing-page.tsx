@@ -153,7 +153,7 @@ export default function LandingPage() {
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: "60px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "60px", display: "none" }}
             />
           </button>
 
@@ -211,7 +211,7 @@ export default function LandingPage() {
             src={pergoniaLogo}
             alt="Pergonia Arquitectura Exterior"
             className="mx-auto w-auto"
-            style={{ filter: "brightness(0) invert(1)", height: "250px" }}
+            style={{ filter: "brightness(0) invert(1)", height: "500px" }}
           />
         </div>
       </section>
