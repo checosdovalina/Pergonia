@@ -1,0 +1,44 @@
+pm2 delete pergonia
+pm2 start /var/www/pergonia/ecosystem.config.cjs
+pm2 save
+systemctl reload nginx
+curl http://localhost:7000
+[PM2] Applying action stopProcessId on app [pergonia](ids: [ 16 ])
+[PM2] [pergonia](16) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ comite-app         │ fork     │ 14   │ stopped   │ 0%       │ 0b       │
+│ 14 │ courtflow          │ fork     │ 11   │ online    │ 0%       │ 231.4mb  │
+│ 12 │ courtflow-api      │ fork     │ 4    │ stopped   │ 0%       │ 0b       │
+│ 6  │ geodoc             │ fork     │ 8    │ stopped   │ 0%       │ 0b       │
+│ 16 │ pergonia           │ fork     │ 314  │ stopped   │ 0%       │ 0b       │
+│ 4  │ sheltiescrm        │ fork     │ 20   │ online    │ 0%       │ 62.2mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Applying action deleteProcessId on app [pergonia](ids: [ 16 ])
+[PM2] [pergonia](16) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ comite-app         │ fork     │ 14   │ stopped   │ 0%       │ 0b       │
+│ 14 │ courtflow          │ fork     │ 11   │ online    │ 0%       │ 231.8mb  │
+│ 12 │ courtflow-api      │ fork     │ 4    │ stopped   │ 0%       │ 0b       │
+│ 6  │ geodoc             │ fork     │ 8    │ stopped   │ 0%       │ 0b       │
+│ 4  │ sheltiescrm        │ fork     │ 20   │ online    │ 0%       │ 62.2mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2][WARN] Applications pergonia not running, starting...
+[PM2] App [pergonia] launched (1 instances)
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ comite-app         │ fork     │ 14   │ stopped   │ 0%       │ 0b       │
+│ 14 │ courtflow          │ fork     │ 11   │ online    │ 0%       │ 231.8mb  │
+│ 12 │ courtflow-api      │ fork     │ 4    │ stopped   │ 0%       │ 0b       │
+│ 6  │ geodoc             │ fork     │ 8    │ stopped   │ 0%       │ 0b       │
+│ 17 │ pergonia           │ fork     │ 0    │ online    │ 0%       │ 12.5mb   │
+│ 4  │ sheltiescrm        │ fork     │ 20   │ online    │ 0%       │ 62.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+curl: (7) Failed to connect to localhost port 7000: Connection refused
+[root@localhost pergonia]# 
