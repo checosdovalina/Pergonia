@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { SimpleQuoteForm } from "@/components/simple-quote-form";
+import { PergoniaQuoteForm } from "@/components/pergonia-quote-form";
 import { SimpleQuoteDetail } from "@/components/simple-quote-detail";
 import { Layout } from "@/components/layout";
 import { useToast } from "@/hooks/use-toast";
@@ -353,7 +353,7 @@ export default function SimpleQuotes() {
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[75vh] overflow-y-auto pr-2">
-            <SimpleQuoteForm initialData={quoteToEdit || undefined} onSuccess={handleCloseForm} />
+            <PergoniaQuoteForm initialData={quoteToEdit || undefined} onSuccess={handleCloseForm} />
           </div>
         </DialogContent>
       </Dialog>

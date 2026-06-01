@@ -763,15 +763,79 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
             </div>
           </div>
 
-          {/* Scope of Work */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Alcance del Trabajo</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="text-sm text-gray-900 leading-relaxed">
-                {formatText(quote.scopeOfWork)}
+          {/* Servicios Pergonia */}
+          {(() => {
+            const eb = quote.exteriorBreakdown;
+            const servicios: string[] = eb?._pergoniaServicios || [];
+            const partidas: any[]     = eb?._pergoniaPartidas  || [];
+            const LABEL: Record<string, string> = {
+              alberca: "Alberca", deck: "Deck / Terraza", pergola: "Pérgola / Palapa",
+              area_social: "Área Social", jardin: "Jardín", remodelacion: "Remodelación", otro: "Otro",
+            };
+            return (
+              <>
+                {/* Tipo de servicio */}
+                {servicios.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Tipo de Servicio</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {servicios.map(s => (
+                        <span key={s} className="inline-flex items-center px-3 py-1 rounded-full bg-[#4a5e30]/10 text-[#4a5e30] text-sm font-medium">
+                          {LABEL[s] || s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Partidas */}
+                {partidas.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Partidas de Obra</h3>
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 grid grid-cols-12 gap-1 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        <div className="col-span-5">Descripción</div>
+                        <div className="col-span-2 text-center">Unidad</div>
+                        <div className="col-span-2 text-right">Cantidad</div>
+                        <div className="col-span-1 text-right">P. Unit.</div>
+                        <div className="col-span-2 text-right">Subtotal</div>
+                      </div>
+                      <div className="divide-y">
+                        {partidas.map((p: any, i: number) => {
+                          const sub = (p.cantidad || 0) * (p.precioUnitario || 0);
+                          return (
+                            <div key={i} className="grid grid-cols-12 gap-1 px-4 py-2.5 text-sm">
+                              <div className="col-span-5 font-medium text-gray-900">{p.descripcion}</div>
+                              <div className="col-span-2 text-center text-gray-500">{p.unidad}</div>
+                              <div className="col-span-2 text-right text-gray-700">{p.cantidad}</div>
+                              <div className="col-span-1 text-right text-gray-700">
+                                ${Number(p.precioUnitario || 0).toLocaleString("es-MX")}
+                              </div>
+                              <div className="col-span-2 text-right font-semibold text-[#4a5e30]">
+                                ${sub.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {/* Alcance del Trabajo */}
+          {quote.scopeOfWork && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Alcance del Trabajo</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm text-gray-900 leading-relaxed">
+                  {formatText(quote.scopeOfWork)}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Total */}
           <div className="border-t pt-4">
@@ -783,7 +847,7 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Notas Internas */}
           {quote.notes && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Notas Internas</h3>
