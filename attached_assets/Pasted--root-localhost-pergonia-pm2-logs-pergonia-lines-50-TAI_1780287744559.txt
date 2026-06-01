@@ -1,0 +1,133 @@
+[root@localhost pergonia]# pm2 logs pergonia --lines 50
+[TAILING] Tailing last 50 lines for [pergonia] process (change the value with --lines option)
+/root/.pm2/logs/pergonia-error.log last 50 lines:
+15|pergoni |             ^
+15|pergoni | 
+15|pergoni | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergoni |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergoni |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergoni |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergoni |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergoni |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergoni |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergoni | 
+15|pergoni | Node.js v20.19.6
+15|pergoni | file:///var/www/pergonia/dist/index.js:908
+15|pergoni |       throw new Error(
+15|pergoni |             ^
+15|pergoni | 
+15|pergoni | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergoni |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergoni |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergoni |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergoni |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergoni |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergoni |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergoni | 
+15|pergoni | Node.js v20.19.6
+15|pergoni | file:///var/www/pergonia/dist/index.js:908
+15|pergoni |       throw new Error(
+15|pergoni |             ^
+15|pergoni | 
+15|pergoni | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergoni |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergoni |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergoni |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergoni |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergoni |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergoni |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergoni | 
+15|pergoni | Node.js v20.19.6
+15|pergoni | file:///var/www/pergonia/dist/index.js:908
+15|pergoni |       throw new Error(
+15|pergoni |             ^
+15|pergoni | 
+15|pergoni | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergoni |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergoni |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergoni |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergoni |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergoni |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergoni |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergoni | 
+15|pergoni | Node.js v20.19.6
+
+/root/.pm2/logs/pergonia-out.log last 50 lines:
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+15|pergoni | 
+15|pergoni | > rest-express@1.0.0 start
+15|pergoni | > NODE_ENV=production node dist/index.js
+15|pergoni | 
+
+15|pergonia  | file:///var/www/pergonia/dist/index.js:908
+15|pergonia  |       throw new Error(
+15|pergonia  |             ^
+15|pergonia  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergonia  |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergonia  |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergonia  |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergonia  |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergonia  |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergonia  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergonia  | Node.js v20.19.6
+15|pergonia  | > rest-express@1.0.0 start
+15|pergonia  | > NODE_ENV=production node dist/index.js
+15|pergonia  | file:///var/www/pergonia/dist/index.js:908
+15|pergonia  |       throw new Error(
+15|pergonia  |             ^
+15|pergonia  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+15|pergonia  |     at server/db.ts (file:///var/www/pergonia/dist/index.js:908:13)
+15|pergonia  |     at __init (file:///var/www/pergonia/dist/index.js:10:56)
+15|pergonia  |     at file:///var/www/pergonia/dist/index.js:934:1
+15|pergonia  |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+15|pergonia  |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+15|pergonia  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+15|pergonia  | Node.js v20.19.6
+15|pergonia  | > rest-express@1.0.0 start
+15|pergonia  | > NODE_ENV=production node dist/index.js
+1
