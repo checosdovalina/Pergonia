@@ -153,7 +153,7 @@ export default function LandingPage() {
               src={pergoniaLogo}
               alt="Pergonia Arquitectura Exterior"
               className="w-auto transition-all duration-300"
-              style={{ filter: "brightness(0) invert(1)", height: "250px" }}
+              style={{ filter: "brightness(0) invert(1)", height: "60px" }}
             />
           </button>
 
@@ -207,15 +207,12 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-black/50"></div>
         </div>
         <div className="relative z-10 text-center text-[#f5f0e8] px-4 w-full">
-          <h1
-            className="text-[12vw] leading-[0.9] tracking-tight mb-6"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            Pergonia
-          </h1>
-          <p className="text-lg md:text-xl lg:text-2xl font-light tracking-wide max-w-2xl mx-auto uppercase">
-            Arquitectura Exterior
-          </p>
+          <img
+            src={pergoniaLogo}
+            alt="Pergonia Arquitectura Exterior"
+            className="mx-auto w-auto"
+            style={{ filter: "brightness(0) invert(1)", height: "250px" }}
+          />
         </div>
       </section>
 
