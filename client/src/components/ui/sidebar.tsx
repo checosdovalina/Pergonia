@@ -77,7 +77,6 @@ export function Sidebar({ className }: SidebarProps) {
       links: [
         { name: "Clientes", path: "/dashboard/clients", icon: <Users className="w-4 h-4" /> },
         { name: "Cotizaciones", path: "/dashboard/simple-quotes", icon: <FileText className="w-4 h-4" /> },
-        { name: "Órdenes de Servicio", path: "/dashboard/service-orders", icon: <Clipboard className="w-4 h-4" /> },
         { name: "Proyectos", path: "/dashboard/projects", icon: <Network className="w-4 h-4" /> },
       ],
     },
@@ -86,7 +85,6 @@ export function Sidebar({ className }: SidebarProps) {
       links: [
         { name: "Facturas", path: "/dashboard/invoices", icon: <FileText className="w-4 h-4" /> },
         { name: "Pagos y Gastos", path: "/dashboard/payments", icon: <DollarSign className="w-4 h-4" /> },
-        { name: "Reportes Financieros", path: "/dashboard/financial-reports", icon: <TrendingUp className="w-4 h-4" /> },
       ],
     },
     {
