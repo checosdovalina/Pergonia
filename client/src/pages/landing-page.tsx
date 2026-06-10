@@ -3,13 +3,59 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { GalleryItem } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import pergoniaLogo from "@assets/pergonia_logo_transparent.png";
 
-const PHONE = "871 218 7073";
-const PHONE_LINK = "tel:+528712187073";
-const EMAIL = "contacto@pergonia.mx";
-const WHATSAPP = "https://wa.me/528712187073";
+const SUCURSALES = [
+  {
+    id: "torreon",
+    ciudad: "Torreón",
+    estado: "Coahuila",
+    etiqueta: "Sede Principal",
+    direccion: "Torreón, Coahuila, México",
+    telefono: "871 218 7073",
+    phoneLink: "tel:+528712187073",
+    email: "torreon@pergonia.mx",
+    whatsapp: "https://wa.me/528712187073",
+    atencion: "Lun – Vie: 9:00 – 18:00  |  Sáb: 10:00 – 14:00",
+  },
+  {
+    id: "saltillo",
+    ciudad: "Saltillo",
+    estado: "Coahuila",
+    etiqueta: "Sucursal",
+    direccion: "Saltillo, Coahuila, México",
+    telefono: "844 000 0000",
+    phoneLink: "tel:+528440000000",
+    email: "saltillo@pergonia.mx",
+    whatsapp: "https://wa.me/528440000000",
+    atencion: "Lun – Vie: 9:00 – 18:00",
+  },
+  {
+    id: "parras",
+    ciudad: "Parras de la Fuente",
+    estado: "Coahuila",
+    etiqueta: "Sucursal",
+    direccion: "Parras de la Fuente, Coahuila, México",
+    telefono: "842 000 0000",
+    phoneLink: "tel:+528420000000",
+    email: "parras@pergonia.mx",
+    whatsapp: "https://wa.me/528420000000",
+    atencion: "Lun – Vie: 9:00 – 18:00",
+  },
+  {
+    id: "durango",
+    ciudad: "Durango",
+    estado: "Durango",
+    etiqueta: "Sucursal",
+    direccion: "Durango, Durango, México",
+    telefono: "618 000 0000",
+    phoneLink: "tel:+526180000000",
+    email: "durango@pergonia.mx",
+    whatsapp: "https://wa.me/526180000000",
+    atencion: "Lun – Vie: 9:00 – 18:00",
+  },
+];
 
 const services = [
   {
@@ -39,8 +85,10 @@ const defaultGallery = [
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", message: "" });
+  const [activeSede, setActiveSede] = useState(SUCURSALES[0].id);
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", sede: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const sedeActiva = SUCURSALES.find((s) => s.id === activeSede) ?? SUCURSALES[0];
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,7 +151,7 @@ export default function LandingPage() {
             name: "Pergonia — Arquitectura Exterior",
             description: "Especialistas en diseño y construcción de albercas, áreas sociales y arquitectura exterior en Torreón, Coahuila.",
             telephone: "+52 871 218 7073",
-            email: EMAIL,
+            email: "torreon@pergonia.mx",
             address: { "@type": "PostalAddress", addressLocality: "Torreón", addressRegion: "Coahuila", addressCountry: "MX" },
             url: "https://pergonia.mx",
             serviceArea: { "@type": "Place", name: "La Comarca Lagunera, México" },
@@ -158,8 +206,8 @@ export default function LandingPage() {
           </button>
 
           {/* Links — centrados en el ancho total */}
-          <div className="flex-1 flex justify-center gap-10 text-base uppercase tracking-widest font-bold text-[#f5f0e8]">
-            {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
+          <div className="flex-1 flex justify-center gap-8 text-base uppercase tracking-widest font-bold text-[#f5f0e8]">
+            {["servicios", "galeria", "nosotros", "sucursales", "contacto"].map((id) => (
               <button
                 key={id}
                 onClick={() => scrollTo(id)}
@@ -183,7 +231,7 @@ export default function LandingPage() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-40 bg-[#4a5e30] flex flex-col items-center justify-center gap-10">
-          {["servicios", "galeria", "nosotros", "contacto"].map((id) => (
+          {["servicios", "galeria", "nosotros", "sucursales", "contacto"].map((id) => (
             <button
               key={id}
               onClick={() => scrollTo(id)}
@@ -348,6 +396,121 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── SUCURSALES ── */}
+      <section id="sucursales" className="py-32 px-4 md:px-8 bg-[#f5f0e8]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-xs uppercase tracking-widest text-[#c9a962] font-semibold mb-4">Presencia Regional</p>
+            <h2 className="text-5xl md:text-6xl text-[#4a5e30]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Nuestras Sedes
+            </h2>
+            <p className="mt-6 text-gray-500 font-light text-lg max-w-xl mx-auto">
+              Estamos cerca de ti. Contáctanos directamente en la sucursal de tu ciudad.
+            </p>
+          </div>
+
+          {/* Tabs de ciudades */}
+          <div className="flex flex-wrap justify-center gap-3 mb-14">
+            {SUCURSALES.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSede(s.id)}
+                className={`px-6 py-3 text-sm uppercase tracking-widest font-semibold transition-all duration-300 border ${
+                  activeSede === s.id
+                    ? "bg-[#4a5e30] text-[#f5f0e8] border-[#4a5e30]"
+                    : "bg-transparent text-[#4a5e30] border-[#4a5e30]/30 hover:border-[#4a5e30]"
+                }`}
+              >
+                {s.ciudad}
+                {s.etiqueta === "Sede Principal" && (
+                  <span className="ml-2 text-[10px] text-[#c9a962]">★</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Card de la sede activa */}
+          <div className="bg-white border border-[#c9a962]/20 p-10 md:p-14 max-w-3xl mx-auto">
+            <div className="flex items-start justify-between flex-wrap gap-4 mb-10">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-[#c9a962] font-semibold">
+                  {sedeActiva.etiqueta}
+                </span>
+                <h3 className="text-4xl md:text-5xl text-[#4a5e30] mt-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  {sedeActiva.ciudad}
+                </h3>
+                <p className="text-gray-400 text-sm mt-1">{sedeActiva.estado}, México</p>
+              </div>
+              <MapPin className="text-[#c9a962] w-8 h-8 mt-2 flex-shrink-0" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <a href={sedeActiva.phoneLink} className="flex items-start gap-4 group">
+                <div className="w-10 h-10 border border-[#c9a962]/40 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c9a962]/10 transition-colors">
+                  <Phone className="w-4 h-4 text-[#c9a962]" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Teléfono</p>
+                  <p className="text-[#4a5e30] font-medium group-hover:text-[#c9a962] transition-colors">{sedeActiva.telefono}</p>
+                </div>
+              </a>
+
+              <a href={`mailto:${sedeActiva.email}`} className="flex items-start gap-4 group">
+                <div className="w-10 h-10 border border-[#c9a962]/40 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c9a962]/10 transition-colors">
+                  <Mail className="w-4 h-4 text-[#c9a962]" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Correo</p>
+                  <p className="text-[#4a5e30] font-medium group-hover:text-[#c9a962] transition-colors">{sedeActiva.email}</p>
+                </div>
+              </a>
+
+              <a href={sedeActiva.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group">
+                <div className="w-10 h-10 border border-[#c9a962]/40 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c9a962]/10 transition-colors">
+                  <MessageCircle className="w-4 h-4 text-[#c9a962]" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">WhatsApp</p>
+                  <p className="text-[#4a5e30] font-medium group-hover:text-[#c9a962] transition-colors">Escríbenos</p>
+                </div>
+              </a>
+
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 border border-[#c9a962]/40 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Horario</p>
+                  <p className="text-[#4a5e30] font-medium text-sm">{sedeActiva.atencion}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 pt-8 border-t border-[#c9a962]/20 flex flex-wrap gap-4">
+              <a
+                href={sedeActiva.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-3 bg-[#4a5e30] text-[#f5f0e8] text-sm uppercase tracking-widest font-semibold hover:bg-[#3a4e20] transition-colors"
+              >
+                WhatsApp
+              </a>
+              <button
+                onClick={() => {
+                  setFormData((f) => ({ ...f, sede: sedeActiva.ciudad }));
+                  scrollTo("contacto");
+                }}
+                className="inline-block px-8 py-3 border border-[#4a5e30] text-[#4a5e30] text-sm uppercase tracking-widest font-semibold hover:bg-[#4a5e30] hover:text-[#f5f0e8] transition-colors"
+              >
+                Solicitar Cotización
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CONTACT ── */}
       <section id="contacto" className="py-32 px-4 md:px-8 bg-[#4a5e30] text-[#f5f0e8]">
         <div className="max-w-2xl mx-auto text-center">
@@ -407,6 +570,25 @@ export default function LandingPage() {
               ))}
 
               <div className="space-y-2">
+                <label htmlFor="sede" className="block text-xs uppercase tracking-widest font-semibold opacity-70">
+                  Sede de Contacto
+                </label>
+                <select
+                  id="sede"
+                  value={formData.sede}
+                  onChange={(e) => setFormData({ ...formData, sede: e.target.value })}
+                  className="w-full bg-[#4a5e30] border-b border-[#c9a962]/40 py-3 text-lg focus:outline-none focus:border-[#c9a962] transition-colors text-[#f5f0e8]"
+                >
+                  <option value="">Selecciona tu ciudad...</option>
+                  {SUCURSALES.map((s) => (
+                    <option key={s.id} value={s.ciudad}>
+                      {s.ciudad}{s.etiqueta === "Sede Principal" ? " (Sede Principal)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
                 <label htmlFor="service" className="block text-xs uppercase tracking-widest font-semibold opacity-70">
                   Servicio de Interés
                 </label>
@@ -451,17 +633,17 @@ export default function LandingPage() {
             </form>
           )}
 
-          {/* Contact info */}
+          {/* Contact info — sede principal */}
           <div className="mt-20 pt-10 border-t border-[#c9a962]/20 grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm opacity-70">
-            <a href={PHONE_LINK} className="hover:opacity-100 transition-opacity">
+            <a href={SUCURSALES[0].phoneLink} className="hover:opacity-100 transition-opacity">
               <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">Teléfono</p>
-              <p>{PHONE}</p>
+              <p>{SUCURSALES[0].telefono}</p>
             </a>
-            <a href={`mailto:${EMAIL}`} className="hover:opacity-100 transition-opacity">
+            <a href={`mailto:${SUCURSALES[0].email}`} className="hover:opacity-100 transition-opacity">
               <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">Correo</p>
-              <p>{EMAIL}</p>
+              <p>{SUCURSALES[0].email}</p>
             </a>
-            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
+            <a href={SUCURSALES[0].whatsapp} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
               <p className="text-xs uppercase tracking-widest mb-1 text-[#c9a962]">WhatsApp</p>
               <p>Escríbenos</p>
             </a>
@@ -470,8 +652,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-[#2d3a1d] text-[#f5f0e8]/50 py-8 px-4 text-center text-xs uppercase tracking-widest">
-        <p>&copy; {new Date().getFullYear()} Pergonia Arquitectura Exterior — Torreón, Coahuila.</p>
+      <footer className="bg-[#2d3a1d] text-[#f5f0e8]/50 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 text-center">
+            {SUCURSALES.map((s) => (
+              <div key={s.id}>
+                <p className="text-[#c9a962] text-xs uppercase tracking-widest font-semibold mb-2">
+                  {s.ciudad}
+                  {s.etiqueta === "Sede Principal" && <span className="ml-1">★</span>}
+                </p>
+                <a href={s.phoneLink} className="block text-xs hover:text-[#f5f0e8]/80 transition-colors">{s.telefono}</a>
+                <a href={`mailto:${s.email}`} className="block text-xs hover:text-[#f5f0e8]/80 transition-colors mt-0.5">{s.email}</a>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-[#f5f0e8]/10 pt-8 text-center text-xs uppercase tracking-widest">
+            <p>&copy; {new Date().getFullYear()} Pergonia Arquitectura Exterior. Torreón · Saltillo · Parras · Durango.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
