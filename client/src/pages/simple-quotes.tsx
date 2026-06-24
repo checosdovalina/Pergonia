@@ -49,7 +49,7 @@ export default function SimpleQuotes() {
   const { data: projects = [] }          = useQuery({ queryKey: ["/api/projects"] });
   const { data: clients = [] }           = useQuery({ queryKey: ["/api/clients"] });
 
-  const simpleQuotes = [...quotes].filter((q: any) => q.scopeOfWork || q.clientId);
+  const simpleQuotes = [...(quotes as any[])];
 
   const getClientForQuote = (q: any) => {
     // Direct clientId (new flow)
