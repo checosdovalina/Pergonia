@@ -49,14 +49,22 @@ export default function SimpleQuotes() {
   const { data: projects = [] }          = useQuery({ queryKey: ["/api/projects"] });
   const { data: clients = [] }           = useQuery({ queryKey: ["/api/clients"] });
 
-  const simpleQuotes = [...quotes].filter((q: any) => q.scopeOfWork);
+  const simpleQuotes = [...quotes].filter((q: any) => q.scopeOfWork || q.clientId);
+
+  const getClientForQuote = (q: any) => {
+    // Direct clientId (new flow)
+    if (q.clientId) return (clients as any[]).find((c: any) => c.id === q.clientId) || null;
+    // Legacy: resolve through project
+    const proj = (projects as any[]).find((p: any) => p.id === q.projectId);
+    return proj ? (clients as any[]).find((c: any) => c.id === proj.clientId) : null;
+  };
 
   const filtered = simpleQuotes.filter((q: any) => {
     if (statusFilter !== "all" && q.status !== statusFilter) return false;
     if (searchTerm) {
       const proj = (projects as any[]).find((p: any) => p.id === q.projectId);
-      const cl   = proj ? (clients as any[]).find((c: any) => c.id === proj.clientId) : null;
-      const txt  = [proj?.title, cl?.name, q.scopeOfWork, q.notes].filter(Boolean).join(" ").toLowerCase();
+      const cl   = getClientForQuote(q);
+      const txt  = [proj?.title, cl?.name, q.workAddress, q.scopeOfWork, q.notes].filter(Boolean).join(" ").toLowerCase();
       if (!txt.includes(searchTerm.toLowerCase())) return false;
     }
     return true;
@@ -77,10 +85,6 @@ export default function SimpleQuotes() {
     .reduce((s: number, q: any) => s + Number(q.totalEstimate || 0), 0);
 
   const getProject = (id: number) => (projects as any[]).find((p: any) => p.id === id);
-  const getClient  = (projectId: number) => {
-    const proj = getProject(projectId);
-    return proj ? (clients as any[]).find((c: any) => c.id === proj.clientId) : null;
-  };
 
   const handleNewQuote = () => { setQuoteToEdit(null); setShowQuoteForm(true); };
   const handleEditQuote = (q: any) => { setQuoteToEdit(q); setShowQuoteForm(true); };
@@ -100,12 +104,13 @@ export default function SimpleQuotes() {
   };
 
   const handleExportTxt = (quote: any) => {
-    const proj = getProject(quote.projectId);
-    const cl   = getClient(quote.projectId);
+    const proj = quote.projectId ? getProject(quote.projectId) : null;
+    const cl   = getClientForQuote(quote);
     const txt = [
       `Cotización #${quote.id}`,
-      `Proyecto: ${proj?.title || "—"}`,
-      `Cliente: ${cl?.name || "—"}`,
+      cl ? `Cliente: ${cl.name}` : "",
+      proj ? `Proyecto: ${proj.title}` : "",
+      quote.workAddress ? `Dirección: ${quote.workAddress}` : "",
       `Total: $${Number(quote.totalEstimate || 0).toLocaleString("es-MX")} MXN`,
       `Estatus: ${STATUS_CONFIG[quote.status]?.label || quote.status}`,
       "",
@@ -248,17 +253,17 @@ export default function SimpleQuotes() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((q: any) => {
-                  const proj = getProject(q.projectId);
-                  const cl   = getClient(q.projectId);
+                  const proj = q.projectId ? getProject(q.projectId) : null;
+                  const cl   = getClientForQuote(q);
                   const date = q.sentDate || q.createdAt;
                   return (
                     <tr key={q.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-3.5 text-gray-400 font-mono text-xs">#{q.id}</td>
                       <td className="px-5 py-3.5">
-                        <p className="font-medium text-gray-900 truncate max-w-[180px]">{proj?.title || `Proyecto #${q.projectId}`}</p>
-                        <p className="text-xs text-gray-400 truncate max-w-[180px] mt-0.5">{q.scopeOfWork?.substring(0, 60)}…</p>
+                        <p className="font-medium text-gray-900 truncate max-w-[180px]">{cl?.name || proj?.title || `Cotización #${q.id}`}</p>
+                        <p className="text-xs text-gray-400 truncate max-w-[180px] mt-0.5">{q.workAddress || q.scopeOfWork?.substring(0, 60) || "—"}</p>
                       </td>
-                      <td className="px-5 py-3.5 text-gray-700">{cl?.name || "—"}</td>
+                      <td className="px-5 py-3.5 text-gray-700">{cl?.phone || cl?.email || "—"}</td>
                       <td className="px-5 py-3.5 font-semibold text-gray-900">
                         ${Number(q.totalEstimate || 0).toLocaleString("es-MX")}
                       </td>
@@ -292,8 +297,8 @@ export default function SimpleQuotes() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((q: any) => {
-            const proj = getProject(q.projectId);
-            const cl   = getClient(q.projectId);
+            const proj = q.projectId ? getProject(q.projectId) : null;
+            const cl   = getClientForQuote(q);
             const date = q.sentDate || q.createdAt;
             return (
               <Card key={q.id} className="hover:shadow-md transition-shadow">
@@ -301,8 +306,8 @@ export default function SimpleQuotes() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-400 font-mono mb-1">#{q.id}</p>
-                      <h3 className="font-semibold text-gray-900 truncate">{proj?.title || `Proyecto #${q.projectId}`}</h3>
-                      <p className="text-sm text-gray-500 mt-0.5">{cl?.name || "—"}</p>
+                      <h3 className="font-semibold text-gray-900 truncate">{cl?.name || proj?.title || `Cotización #${q.id}`}</h3>
+                      <p className="text-sm text-gray-500 mt-0.5">{q.workAddress || proj?.title || "—"}</p>
                     </div>
                     <StatusPill status={q.status} />
                   </div>

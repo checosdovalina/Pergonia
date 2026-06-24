@@ -104,7 +104,9 @@ export const insertProjectSchema = baseProjectSchema.extend({
 // Quote schema
 export const quotes = pgTable("quotes", {
   id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull(),
+  clientId: integer("client_id"),
+  projectId: integer("project_id"),
+  workAddress: text("work_address"),
   materialsEstimate: jsonb("materials_estimate"),
   laborEstimate: jsonb("labor_estimate"),
   totalEstimate: decimal("total_estimate", { precision: 10, scale: 2 }).notNull(),
@@ -134,7 +136,9 @@ export const quotes = pgTable("quotes", {
 
 // Esquema base para cotizaciones
 const baseQuoteSchema = createInsertSchema(quotes).pick({
+  clientId: true,
   projectId: true,
+  workAddress: true,
   materialsEstimate: true,
   laborEstimate: true,
   scopeOfWork: true,

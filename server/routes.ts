@@ -527,11 +527,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple Quote routes (simplified quote module)
   app.post("/api/simple-quotes", isAuthenticated, async (req, res) => {
     try {
-      // Get project to inherit images and documents
-      const project = await storage.getProject(req.body.projectId);
-      
+      const projectId = req.body.projectId || null;
+      const clientId  = req.body.clientId  || null;
+
+      // Optionally get project to inherit images/documents
+      const project = projectId ? await storage.getProject(projectId) : null;
+      const resolvedClientId = clientId || project?.clientId || null;
+
       const simpleQuoteData = {
-        projectId: req.body.projectId,
+        clientId:  resolvedClientId,
+        projectId,
+        workAddress: req.body.workAddress || null,
         totalEstimate: req.body.totalEstimate,
         scopeOfWork: req.body.scopeOfWork,
         isInterior: req.body.isInterior || false,
@@ -547,20 +553,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "draft",
         materialsEstimate: [],
         laborEstimate: [],
-        // Inherit images and documents from project
         images: project?.images || null,
         documents: project?.documents || null,
       };
 
       const quote = await storage.createQuote(simpleQuoteData);
       
-      // Create activity for simple quote creation
       await storage.createActivity({
         type: "quote_created",
-        description: `Simple quote created for project "${project?.title || 'Unknown'}"`,
+        description: `Cotización creada${project ? ` para proyecto "${project.title}"` : ""}`,
         userId: req.user.id,
         projectId: quote.projectId,
-        clientId: project?.clientId
+        clientId: quote.clientId,
       });
       
       res.status(201).json(quote);
@@ -584,7 +588,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update only the simple quote fields
       const updatedData = {
         ...currentQuote,
-        projectId: req.body.projectId,
+        clientId:  req.body.clientId  || currentQuote.clientId  || null,
+        projectId: req.body.projectId || currentQuote.projectId || null,
+        workAddress: req.body.workAddress ?? currentQuote.workAddress ?? null,
         totalEstimate: req.body.totalEstimate,
         scopeOfWork: req.body.scopeOfWork || "",
         isInterior: req.body.isInterior || false,

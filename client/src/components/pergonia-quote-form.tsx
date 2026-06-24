@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Plus, Trash2, Calculator, Users, FolderPlus } from "lucide-react";
+import { Plus, Trash2, Calculator, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,6 @@ import { es } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ClientForm } from "@/components/client-form";
-import { ProjectForm } from "@/components/project-form";
 
 // ── Tipos de servicio de Pergonia ───────────────────────────────────────────
 const SERVICIOS = [
@@ -45,7 +44,8 @@ const partidaSchema = z.object({
 });
 
 const formSchema = z.object({
-  projectId:    z.number().min(1, "Selecciona un proyecto"),
+  clientId:     z.number().min(1, "Selecciona un cliente"),
+  workAddress:  z.string().optional(),
   servicios:    z.array(z.string()).min(1, "Selecciona al menos un tipo de servicio"),
   partidas:     z.array(partidaSchema).default([]),
   scopeOfWork:  z.string().optional(),
@@ -64,21 +64,12 @@ interface Props {
 
 export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const { toast } = useToast();
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [showClientForm,   setShowClientForm]   = useState(false);
-  const [showProjectForm,  setShowProjectForm]  = useState(false);
-  const [validUntilOpen,   setValidUntilOpen]   = useState(false);
-  const [sentDateOpen,     setSentDateOpen]     = useState(false);
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [validUntilOpen, setValidUntilOpen] = useState(false);
+  const [sentDateOpen,   setSentDateOpen]   = useState(false);
 
-  const { data: clients  = [] } = useQuery({ queryKey: ["/api/clients"]  });
-  const { data: projects = [] } = useQuery({ queryKey: ["/api/projects"] });
+  const { data: clients = [] } = useQuery({ queryKey: ["/api/clients"] });
 
-  const filteredProjects = selectedClientId
-    ? (projects as any[]).filter((p: any) => p.clientId === selectedClientId)
-    : (projects as any[]);
-
-  // Reconstruct initialData servicios from isInterior / isExterior / isSpecialRequirements
-  // and partidas from exteriorBreakdown (jsonb)
   const getInitialServicios = (): string[] => {
     if (!initialData) return [];
     try {
@@ -99,7 +90,8 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectId:    initialData?.projectId || 0,
+      clientId:     initialData?.clientId || 0,
+      workAddress:  initialData?.workAddress || "",
       servicios:    getInitialServicios(),
       partidas:     getInitialPartidas(),
       scopeOfWork:  initialData?.scopeOfWork || "",
@@ -111,14 +103,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "partidas" });
-
-  // Auto-select client when editing
-  useEffect(() => {
-    if (initialData?.projectId) {
-      const proj = (projects as any[]).find((p: any) => p.id === initialData.projectId);
-      if (proj) setSelectedClientId(proj.clientId);
-    }
-  }, [initialData, projects]);
 
   // Calculate total from partidas
   const calcularTotal = () => {
@@ -141,7 +125,9 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
       const payload = {
-        projectId:    data.projectId,
+        clientId:     data.clientId,
+        projectId:    null,
+        workAddress:  data.workAddress || "",
         totalEstimate: data.totalEstimate,
         scopeOfWork:  data.scopeOfWork || "",
         notes:        data.notes || "",
@@ -154,7 +140,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
         interiorBreakdown: null,
         specialRequirements: null,
         optionalComments: null,
-        // Store Pergonia-specific data in exteriorBreakdown jsonb
         exteriorBreakdown: {
           _pergoniaServicios: data.servicios,
           _pergoniaPartidas:  data.partidas,
@@ -184,15 +169,8 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const handleClientCreated = (newClient?: any) => {
     setShowClientForm(false);
     queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-    if (newClient?.id) setSelectedClientId(newClient.id);
+    if (newClient?.id) form.setValue("clientId", newClient.id);
     toast({ title: "Cliente creado" });
-  };
-
-  const handleProjectCreated = (newProject?: any) => {
-    setShowProjectForm(false);
-    queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-    if (newProject?.id) form.setValue("projectId", newProject.id);
-    toast({ title: "Proyecto creado" });
   };
 
   const totalEstimate = form.watch("totalEstimate");
@@ -203,60 +181,42 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(d => mutation.mutate(d))} className="space-y-6">
 
-        {/* ── Cliente / Proyecto ─────────────────────────────────────────── */}
+        {/* ── Cliente + Dirección ─────────────────────────────────────────── */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Cliente */}
-          <FormItem>
-            <div className="flex items-center justify-between">
-              <FormLabel>Cliente</FormLabel>
-              <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs"
-                onClick={() => setShowClientForm(true)}>
-                <Users className="h-3 w-3 mr-1" /> Nuevo Cliente
-              </Button>
-            </div>
-            <Select
-              onValueChange={v => { setSelectedClientId(parseInt(v)); form.setValue("projectId", 0); }}
-              value={selectedClientId?.toString() || ""}
-            >
-              <SelectTrigger><SelectValue placeholder="Selecciona un cliente primero" /></SelectTrigger>
-              <SelectContent>
-                {(clients as any[]).map((c: any) => (
-                  <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormItem>
-
-          {/* Proyecto */}
-          <FormField control={form.control} name="projectId" render={({ field }) => (
+          <FormField control={form.control} name="clientId" render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Proyecto</FormLabel>
+                <FormLabel>Cliente <span className="text-red-500">*</span></FormLabel>
                 <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs"
-                  onClick={() => setShowProjectForm(true)} disabled={!selectedClientId}>
-                  <FolderPlus className="h-3 w-3 mr-1" /> Nuevo Proyecto
+                  onClick={() => setShowClientForm(true)}>
+                  <Users className="h-3 w-3 mr-1" /> Nuevo Cliente
                 </Button>
               </div>
               <Select
                 onValueChange={v => field.onChange(parseInt(v))}
-                value={field.value?.toString() || ""}
-                disabled={!selectedClientId}
+                value={field.value > 0 ? field.value.toString() : ""}
               >
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      !selectedClientId ? "Selecciona un cliente primero"
-                      : filteredProjects.length === 0 ? "Sin proyectos para este cliente"
-                      : "Selecciona un proyecto"
-                    } />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecciona un cliente" /></SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {filteredProjects.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>{p.title}</SelectItem>
+                  {(clients as any[]).map((c: any) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+
+          {/* Dirección del trabajo */}
+          <FormField control={form.control} name="workAddress" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dirección del Trabajo</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ej. Fracc. Las Quintas, Torreón, Coah." />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )} />
@@ -524,19 +484,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
         }}
       />
 
-      {/* Dialog — Nuevo Proyecto */}
-      <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Proyecto</DialogTitle>
-            <DialogDescription>Agrega un proyecto para el cliente seleccionado</DialogDescription>
-          </DialogHeader>
-          <ProjectForm
-            onSuccess={handleProjectCreated}
-            initialData={selectedClientId ? ({ clientId: selectedClientId } as any) : undefined}
-          />
-        </DialogContent>
-      </Dialog>
     </Form>
   );
 }
