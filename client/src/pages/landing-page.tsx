@@ -13,10 +13,10 @@ const SUCURSALES = [
     estado: "Coahuila",
     etiqueta: "Sede Principal",
     direccion: "Torreón, Coahuila, México",
-    telefono: "871 218 7073",
-    phoneLink: "tel:+528712187073",
+    telefono: "871 329 1644",
+    phoneLink: "tel:+5218713291644",
     email: "torreon@pergonia.mx",
-    whatsapp: "https://wa.me/528712187073",
+    whatsapp: "https://wa.me/5218713291644",
     atencion: "Lun – Vie: 9:00 – 18:00  |  Sáb: 10:00 – 14:00",
   },
   {
