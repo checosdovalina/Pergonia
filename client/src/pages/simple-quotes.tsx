@@ -35,6 +35,22 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
+function ExpiryBadge({ validUntil, status }: { validUntil?: string | null; status: string }) {
+  if (!validUntil || ["approved","rejected","converted"].includes(status)) return null;
+  const days = Math.ceil((new Date(validUntil).getTime() - Date.now()) / 86400000);
+  if (days > 5) return null;
+  if (days < 0) return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+      ⚠ Vencida
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+      ⏰ Vence en {days}d
+    </span>
+  );
+}
+
 export default function SimpleQuotes() {
   const [showQuoteForm, setShowQuoteForm]     = useState(false);
   const [quoteToEdit, setQuoteToEdit]         = useState<any>(null);
@@ -281,7 +297,12 @@ export default function SimpleQuotes() {
                       <td className="px-5 py-3.5 font-semibold text-gray-900">
                         ${Number(q.totalEstimate || 0).toLocaleString("es-MX")}
                       </td>
-                      <td className="px-5 py-3.5"><StatusPill status={q.status} /></td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-col gap-1">
+                          <StatusPill status={q.status} />
+                          <ExpiryBadge validUntil={q.validUntil} status={q.status} />
+                        </div>
+                      </td>
                       <td className="px-5 py-3.5 text-gray-500 text-xs whitespace-nowrap">
                         {date ? format(new Date(date), "dd MMM yyyy", { locale: es }) : "—"}
                       </td>
@@ -330,7 +351,10 @@ export default function SimpleQuotes() {
                       <h3 className="font-semibold text-gray-900 truncate">{cl?.name || proj?.title || `Cotización #${q.id}`}</h3>
                       <p className="text-sm text-gray-500 mt-0.5">{q.workAddress || proj?.title || "—"}</p>
                     </div>
-                    <StatusPill status={q.status} />
+                    <div className="flex flex-col items-end gap-1">
+                      <StatusPill status={q.status} />
+                      <ExpiryBadge validUntil={q.validUntil} status={q.status} />
+                    </div>
                   </div>
 
                   {q.scopeOfWork && (

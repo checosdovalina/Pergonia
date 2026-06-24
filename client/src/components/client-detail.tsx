@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Client, Project, Quote } from "@shared/schema";
+import { es } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
@@ -59,9 +60,10 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
 
   // Filter projects and quotes for this specific client
   const clientProjects = projects?.filter(p => p.clientId === client.id) || [];
-  const clientQuotes = quotes?.filter(q => {
+  const clientQuotes = (quotes as any[])?.filter((q: any) => {
+    if (q.clientId === client.id) return true;           // cotización directa
     const project = projects?.find(p => p.id === q.projectId);
-    return project?.clientId === client.id;
+    return project?.clientId === client.id;              // vía proyecto
   }) || [];
 
   const getStatusColor = (status: string) => {
@@ -117,10 +119,10 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
 
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="info">Information</TabsTrigger>
-            <TabsTrigger value="projects">Projects ({totalProjects})</TabsTrigger>
-            <TabsTrigger value="quotes">Quotes ({clientQuotes.length})</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="info">Información</TabsTrigger>
+            <TabsTrigger value="projects">Proyectos ({totalProjects})</TabsTrigger>
+            <TabsTrigger value="quotes">Cotizaciones ({clientQuotes.length})</TabsTrigger>
+            <TabsTrigger value="history">Historial</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-6">
@@ -130,7 +132,7 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Contact Information
+                    Información de Contacto
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -152,30 +154,30 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
               {/* Statistics */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Statistics</CardTitle>
+                  <CardTitle>Estadísticas</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">{totalProjects}</div>
-                      <div className="text-sm text-gray-600">Total Projects</div>
+                      <div className="text-sm text-gray-600">Proyectos</div>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">{completedProjects}</div>
-                      <div className="text-sm text-gray-600">Completed</div>
+                      <div className="text-sm text-gray-600">Completados</div>
                     </div>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">{clientQuotes.length}</div>
-                      <div className="text-sm text-gray-600">Quotes</div>
+                      <div className="text-sm text-gray-600">Cotizaciones</div>
                     </div>
                     <div className="text-center p-3 bg-yellow-50 rounded-lg">
                       <div className="text-2xl font-bold text-yellow-600">{approvedQuotes}</div>
-                      <div className="text-sm text-gray-600">Approved</div>
+                      <div className="text-sm text-gray-600">Aprobadas</div>
                     </div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-3xl font-bold text-gray-700">${totalQuoteValue.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">Total Quote Value</div>
+                    <div className="text-3xl font-bold text-gray-700">${totalQuoteValue.toLocaleString("es-MX")}</div>
+                    <div className="text-sm text-gray-600">Valor total cotizado</div>
                   </div>
                 </CardContent>
               </Card>
@@ -184,7 +186,7 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
             {client.notes && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Notes</CardTitle>
+                  <CardTitle>Notas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700">{client.notes}</p>
@@ -223,13 +225,13 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
                         {project.startDate && (
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            <span>Start: {format(new Date(project.startDate), 'MMM dd, yyyy')}</span>
+                            <span>Inicio: {format(new Date(project.startDate), 'dd MMM yyyy', { locale: es })}</span>
                           </div>
                         )}
                         {project.dueDate && (
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
-                            <span>Due: {format(new Date(project.dueDate), 'MMM dd, yyyy')}</span>
+                            <span>Entrega: {format(new Date(project.dueDate), 'dd MMM yyyy', { locale: es })}</span>
                           </div>
                         )}
                       </div>
@@ -240,8 +242,8 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
             ) : (
               <div className="text-center py-8">
                 <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Projects Yet</h3>
-                <p className="text-gray-500">This client doesn't have any projects assigned.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Sin proyectos</h3>
+                <p className="text-gray-500">Este cliente aún no tiene proyectos asignados.</p>
               </div>
             )}
           </TabsContent>
@@ -256,11 +258,11 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-lg">
-                              Quote for {project?.title || 'Unknown Project'}
+                            <CardTitle className="text-base">
+                              #{quote.id} — {quote.workAddress || project?.title || client.name}
                             </CardTitle>
                             <CardDescription>
-                              Created: {format(new Date(quote.createdAt), 'MMM dd, yyyy')}
+                              Creada: {format(new Date(quote.createdAt), 'dd MMM yyyy', { locale: es })}
                             </CardDescription>
                           </div>
                           <Badge className={getStatusColor(quote.status)}>
@@ -273,18 +275,18 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4 text-gray-400" />
-                            <span className="font-semibold">${quote.totalEstimate?.toLocaleString()}</span>
+                            <span className="font-semibold">${Number(quote.totalEstimate || 0).toLocaleString("es-MX")}</span>
                           </div>
                           {quote.sentDate && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
-                              <span>Sent: {format(new Date(quote.sentDate), 'MMM dd, yyyy')}</span>
+                              <span>Enviada: {format(new Date(quote.sentDate), 'dd MMM yyyy', { locale: es })}</span>
                             </div>
                           )}
                           {quote.validUntil && (
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-gray-400" />
-                              <span>Valid until: {format(new Date(quote.validUntil), 'MMM dd, yyyy')}</span>
+                              <span>Válida hasta: {format(new Date(quote.validUntil), 'dd MMM yyyy', { locale: es })}</span>
                             </div>
                           )}
                         </div>
@@ -301,8 +303,8 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
             ) : (
               <div className="text-center py-8">
                 <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Quotes Yet</h3>
-                <p className="text-gray-500">This client doesn't have any quotes created.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Sin cotizaciones</h3>
+                <p className="text-gray-500">Este cliente aún no tiene cotizaciones registradas.</p>
               </div>
             )}
           </TabsContent>
@@ -310,46 +312,46 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
           <TabsContent value="history" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Activity Timeline</CardTitle>
+                <CardTitle>Línea de tiempo</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Client creation */}
+                  {/* Creación del cliente */}
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                     <div>
-                      <p className="font-medium">Client Created</p>
+                      <p className="font-medium">Cliente registrado</p>
                       <p className="text-sm text-gray-500">
-                        {format(new Date(client.createdAt), 'MMM dd, yyyy at h:mm a')}
+                        {format(new Date(client.createdAt), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
                       </p>
                     </div>
                   </div>
                   
-                  {/* Projects timeline */}
+                  {/* Proyectos */}
                   {clientProjects.map((project) => (
                     <div key={project.id} className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                       <div>
-                        <p className="font-medium">Project "{project.title}" created</p>
+                        <p className="font-medium">Proyecto "{project.title}" creado</p>
                         <p className="text-sm text-gray-500">
-                          {format(new Date(project.createdAt), 'MMM dd, yyyy at h:mm a')}
+                          {format(new Date(project.createdAt), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
                         </p>
                       </div>
                     </div>
                   ))}
 
-                  {/* Quotes timeline */}
-                  {clientQuotes.map((quote) => {
+                  {/* Cotizaciones */}
+                  {clientQuotes.map((quote: any) => {
                     const project = projects?.find(p => p.id === quote.projectId);
                     return (
                       <div key={quote.id} className="flex items-start gap-3">
                         <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
                         <div>
                           <p className="font-medium">
-                            Quote created for "{project?.title || 'Unknown Project'}"
+                            Cotización #{quote.id} — {quote.workAddress || project?.title || client.name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {format(new Date(quote.createdAt), 'MMM dd, yyyy at h:mm a')}
+                            {format(new Date(quote.createdAt), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
                           </p>
                         </div>
                       </div>
@@ -359,8 +361,8 @@ export function ClientDetail({ client, isOpen, onClose }: ClientDetailProps) {
                   {clientProjects.length === 0 && clientQuotes.length === 0 && (
                     <div className="text-center py-8">
                       <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Activity Yet</h3>
-                      <p className="text-gray-500">Client history will appear here as projects and quotes are created.</p>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Sin actividad</h3>
+                      <p className="text-gray-500">El historial del cliente aparecerá aquí conforme se creen proyectos y cotizaciones.</p>
                     </div>
                   )}
                 </div>

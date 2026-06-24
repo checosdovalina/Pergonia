@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { GalleryItem } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Menu, X, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { Menu, X, MapPin, Phone, Mail, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import pergoniaLogo from "@assets/pergonia_logo_transparent.png";
 
 const SUCURSALES = [
@@ -116,6 +116,22 @@ export default function LandingPage() {
 
   const displayGallery = galleryItems.length > 0 ? galleryItems : defaultGallery;
   const visibleGallery = displayGallery.filter((i) => i.isVisible !== false).slice(0, 4);
+
+  // Lightbox state
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const closeLightbox = useCallback(() => setLightboxIdx(null), []);
+  const prevImg = useCallback(() => setLightboxIdx(i => i != null ? (i - 1 + visibleGallery.length) % visibleGallery.length : null), [visibleGallery.length]);
+  const nextImg = useCallback(() => setLightboxIdx(i => i != null ? (i + 1) % visibleGallery.length : null), [visibleGallery.length]);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (lightboxIdx === null) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") prevImg();
+      if (e.key === "ArrowRight") nextImg();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightboxIdx, closeLightbox, prevImg, nextImg]);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -334,49 +350,112 @@ export default function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Main large image */}
-            <div className="md:col-span-8 h-[60vh] md:h-[80vh] overflow-hidden group">
+            <div
+              className="md:col-span-8 h-[60vh] md:h-[80vh] overflow-hidden group cursor-zoom-in relative"
+              onClick={() => setLightboxIdx(0)}
+            >
               {visibleGallery[0] && (
-                <img
-                  src={visibleGallery[0].imageUrl}
-                  alt={visibleGallery[0].title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                <>
+                  <img
+                    src={visibleGallery[0].imageUrl}
+                    alt={visibleGallery[0].title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium tracking-widest uppercase">Ver foto</span>
+                  </div>
+                </>
               )}
             </div>
             {/* Right stacked */}
             <div className="md:col-span-4 grid grid-rows-2 gap-4 h-[60vh] md:h-[80vh]">
               {visibleGallery[1] && (
-                <div className="overflow-hidden group">
+                <div className="overflow-hidden group cursor-zoom-in relative" onClick={() => setLightboxIdx(1)}>
                   <img
                     src={visibleGallery[1].imageUrl}
                     alt={visibleGallery[1].title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                 </div>
               )}
               {visibleGallery[2] && (
-                <div className="overflow-hidden group">
+                <div className="overflow-hidden group cursor-zoom-in relative" onClick={() => setLightboxIdx(2)}>
                   <img
                     src={visibleGallery[2].imageUrl}
                     alt={visibleGallery[2].title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                 </div>
               )}
             </div>
             {/* Bottom wide */}
             {visibleGallery[3] && (
-              <div className="md:col-span-12 h-[40vh] md:h-[60vh] overflow-hidden group">
+              <div className="md:col-span-12 h-[40vh] md:h-[60vh] overflow-hidden group cursor-zoom-in relative" onClick={() => setLightboxIdx(3)}>
                 <img
                   src={visibleGallery[3].imageUrl}
                   alt={visibleGallery[3].title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </div>
             )}
           </div>
         </div>
       </section>
+
+      {/* ── LIGHTBOX ── */}
+      {lightboxIdx !== null && visibleGallery[lightboxIdx] && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          {/* Close */}
+          <button
+            className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10"
+            onClick={closeLightbox}
+          >
+            <X className="w-7 h-7" />
+          </button>
+
+          {/* Prev */}
+          {visibleGallery.length > 1 && (
+            <button
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-colors z-10"
+              onClick={e => { e.stopPropagation(); prevImg(); }}
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Image */}
+          <img
+            src={visibleGallery[lightboxIdx].imageUrl}
+            alt={visibleGallery[lightboxIdx].title}
+            className="max-w-[90vw] max-h-[88vh] object-contain shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+
+          {/* Next */}
+          {visibleGallery.length > 1 && (
+            <button
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 rounded-full hover:bg-white/10 transition-colors z-10"
+              onClick={e => { e.stopPropagation(); nextImg(); }}
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Caption + counter */}
+          <div className="absolute bottom-6 left-0 right-0 text-center">
+            {visibleGallery[lightboxIdx].title && (
+              <p className="text-white text-sm font-medium mb-1">{visibleGallery[lightboxIdx].title}</p>
+            )}
+            <p className="text-white/40 text-xs">{lightboxIdx + 1} / {visibleGallery.length}</p>
+          </div>
+        </div>
+      )}
 
       {/* ── TESTIMONIAL / NOSOTROS ── */}
       <section id="nosotros" className="py-32 px-4 md:px-8 bg-white border-y border-[#c9a962]/20">
