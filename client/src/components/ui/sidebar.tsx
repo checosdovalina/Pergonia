@@ -197,12 +197,15 @@ export function Sidebar({ className }: SidebarProps) {
     <>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-primary z-30 border-b border-primary/20 flex items-center px-4 safe-top">
-        <Button variant="ghost" size="icon" onClick={toggleMobileSidebar} className="text-white hover:bg-white/10 h-9 w-9">
+        <Button variant="ghost" size="icon" onClick={toggleMobileSidebar} className="text-white hover:bg-white/10 h-9 w-9 shrink-0">
           <Menu className="h-5 w-5" />
         </Button>
         <div className="flex-1 flex justify-center items-center gap-2">
-          <Droplets className="w-4 h-4 text-white" />
-          <span className="font-bold text-white tracking-wide">PERGONIA</span>
+          <Droplets className="w-5 h-5 text-[#c9a962] shrink-0" />
+          <div className="flex flex-col items-center leading-none">
+            <span className="font-extrabold text-white text-base tracking-normal">PERGONIA</span>
+            <span className="text-white/60 text-[9px] tracking-widest uppercase">Arquitectura Exterior</span>
+          </div>
         </div>
       </div>
       

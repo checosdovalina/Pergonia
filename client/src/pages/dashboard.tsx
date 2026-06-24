@@ -151,12 +151,14 @@ export default function Dashboard() {
   const KpiCard = ({
     label, value, sub, icon, accent,
   }: { label: string; value: string | number; sub?: string; icon: JSX.Element; accent: string }) => (
-    <div className={`rounded-xl p-5 flex items-start gap-4 bg-white border border-gray-100 shadow-sm`}>
-      <div className={`${accent} rounded-lg p-3 shrink-0`}>{icon}</div>
-      <div>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-sm font-medium text-gray-700 leading-tight">{label}</p>
-        {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+      {/* Color top accent bar */}
+      <div className={`${accent} h-1 w-full`} />
+      <div className="p-4 flex flex-col gap-2">
+        <div className={`${accent} rounded-lg p-2.5 self-start`}>{icon}</div>
+        <p className="text-3xl font-bold text-gray-900 leading-none">{value}</p>
+        <p className="text-xs font-semibold text-gray-700 leading-tight">{label}</p>
+        {sub && <p className="text-[10px] text-gray-400 leading-tight hidden sm:block">{sub}</p>}
       </div>
     </div>
   );
