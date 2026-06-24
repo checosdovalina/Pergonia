@@ -182,7 +182,10 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
   if (!quote) return null;
 
   const project = (projects as any[])?.find((p: any) => p.id === quote.projectId) || null;
-  const client = (clients as any[])?.find((c: any) => c.id === project?.clientId) || null;
+  const client =
+    (clients as any[])?.find((c: any) => c.id === quote.clientId) ||
+    (clients as any[])?.find((c: any) => c.id === project?.clientId) ||
+    null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -235,359 +238,345 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
   const generatePDF = async () => {
     setIsGeneratingPDF(true);
-    
-    try {
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
-      let yPosition = margin;
 
-      // Helper function to check if we need a new page
-      const checkNewPage = (requiredSpace: number = 20) => {
-        if (yPosition + requiredSpace > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
-          return true;
-        }
-        return false;
+    // Brand colors (RGB)
+    const OLIVE   = [74,  94,  48]  as [number,number,number]; // #4a5e30
+    const GOLD    = [201, 169, 98]  as [number,number,number]; // #c9a962
+    const CREAM   = [245, 240, 232] as [number,number,number]; // #f5f0e8
+    const DARK    = [40,  40,  40]  as [number,number,number];
+    const GRAY    = [110, 110, 110] as [number,number,number];
+    const LTGRAY  = [220, 220, 220] as [number,number,number];
+    const WHITE   = [255, 255, 255] as [number,number,number];
+
+    try {
+      const pdf = new jsPDF({ unit: "mm", format: "a4" });
+      const W = pdf.internal.pageSize.getWidth();   // 210
+      const H = pdf.internal.pageSize.getHeight();  // 297
+      const M = 14; // margin
+      let y = 0;
+
+      const checkPage = (need: number = 20) => {
+        if (y + need > H - 16) { pdf.addPage(); y = 16; }
       };
 
-      // Add logo
+      const fmtMXN = (n: number) =>
+        `$${Number(n || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`;
+
+      // ─── HEADER BAND ─────────────────────────────────────────────────────────
+      pdf.setFillColor(...OLIVE);
+      pdf.rect(0, 0, W, 36, "F");
+
+      // Gold accent stripe
+      pdf.setFillColor(...GOLD);
+      pdf.rect(0, 36, W, 1.5, "F");
+
+      // Logo
       try {
         const img = new Image();
         img.crossOrigin = "anonymous";
-        
-        const logoPromise = new Promise((resolve, reject) => {
+        const logoData: string = await new Promise((res, rej) => {
           img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx?.drawImage(img, 0, 0);
-            const logoData = canvas.toDataURL('image/jpeg');
-            resolve(logoData);
+            const c = document.createElement("canvas");
+            c.width = img.width; c.height = img.height;
+            c.getContext("2d")!.drawImage(img, 0, 0);
+            res(c.toDataURL("image/png"));
           };
-          img.onerror = reject;
+          img.onerror = rej;
+          img.src = logoPath;
         });
-        
-        img.src = logoPath;
-        const logoData = await logoPromise;
-        
-        // Add logo to PDF
-        pdf.addImage(logoData as string, 'JPEG', margin, yPosition, 18, 18);
-      } catch (error) {
-        console.log('Logo loading failed, continuing without logo');
-      }
+        pdf.addImage(logoData, "PNG", M, 5, 26, 26);
+      } catch { /* no logo – skip */ }
 
-      // Company Header (next to logo)
-      pdf.setFontSize(16);
+      // Company name
+      pdf.setTextColor(...WHITE);
+      pdf.setFontSize(15);
       pdf.setFont("helvetica", "bold");
-      pdf.text("PERGONIA — ARQUITECTURA EXTERIOR", margin + 22, yPosition + 6);
-      
+      pdf.text("PERGONIA", M + 30, 14);
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      pdf.text("Torreón, Coahuila, México", margin + 22, yPosition + 11);
-      pdf.text("contacto@pergonia.mx", margin + 22, yPosition + 15);
-      pdf.text("www.pergonia.mx", margin + 22, yPosition + 19);
+      pdf.text("ARQUITECTURA EXTERIOR", M + 30, 19);
+      pdf.setFontSize(8);
+      pdf.setTextColor(230, 220, 200);
+      pdf.text("Torreón, Coahuila  ·  contacto@pergonia.mx  ·  www.pergonia.mx", M + 30, 25);
 
-      // Quote number and details (right aligned)
-      const rightX = pageWidth - margin;
-      pdf.setFontSize(14);
+      // Quote badge (right side)
+      pdf.setTextColor(...GOLD);
+      pdf.setFontSize(18);
       pdf.setFont("helvetica", "bold");
-      pdf.text(`Cotización #${quote.id}`, rightX, yPosition + 6, { align: 'right' });
-      
-      pdf.setFontSize(9);
+      pdf.text(`COTIZACIÓN #${quote.id}`, W - M, 15, { align: "right" });
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
-      pdf.text(`Fecha: ${format(new Date(quote.createdAt), "dd/MM/yyyy")}`, rightX, yPosition + 11, { align: 'right' });
-      pdf.text(`Estatus: ${getStatusLabel(quote.status)}`, rightX, yPosition + 15, { align: 'right' });
+      pdf.setTextColor(230, 220, 200);
+      pdf.text(`Fecha: ${format(new Date(quote.createdAt), "dd/MM/yyyy")}`, W - M, 21, { align: "right" });
       if (quote.validUntil) {
-        pdf.text(`Válida hasta: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}`, rightX, yPosition + 19, { align: 'right' });
+        pdf.text(`Válida hasta: ${format(new Date(quote.validUntil), "dd/MM/yyyy")}`, W - M, 26, { align: "right" });
       }
+      pdf.text(`Estatus: ${getStatusLabel(quote.status)}`, W - M, 31, { align: "right" });
 
-      // Line separator
-      yPosition += 30;
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 10;
+      y = 44;
 
-      // Project and Client Information Boxes
-      const leftColumnX = margin;
-      const rightColumnX = pageWidth / 2 + 5;
-      const boxWidth = (pageWidth / 2) - margin - 5;
-      
-      // Calculate actual box heights based on content
-      pdf.setFontSize(9);
-      let projectContentHeight = 13; // Start after header
-      if (project) {
-        const projectNameLines = pdf.splitTextToSize(`Name: ${project.title}`, boxWidth - 6);
-        projectContentHeight += projectNameLines.length * 4;
-        
-        const addressLines = pdf.splitTextToSize(`Address: ${project.address || "N/A"}`, boxWidth - 6);
-        projectContentHeight += addressLines.length * 4;
-      }
-      const projectBoxHeight = Math.max(30, projectContentHeight + 5); // Min 30, +5 for padding
-      
-      let clientContentHeight = 13; // Start after header
-      if (client) {
-        clientContentHeight += 4; // Name line
-        if (client.email) {
-          const emailLines = pdf.splitTextToSize(`Email: ${client.email}`, boxWidth - 6);
-          clientContentHeight += emailLines.length * 4;
-        }
-        if (client.phone) {
-          clientContentHeight += 4; // Phone line
-        }
-        if (client.address) {
-          const addressLines = pdf.splitTextToSize(`Address: ${client.address}`, boxWidth - 6);
-          clientContentHeight += addressLines.length * 4;
-        }
-      }
-      const clientBoxHeight = Math.max(30, clientContentHeight + 5); // Min 30, +5 for padding
+      // ─── CLIENT / PROJECT INFO CARDS ─────────────────────────────────────────
+      const cardW = (W - 2 * M - 6) / 2;
+      const drawCard = (x: number, title: string, lines: string[], cardY: number) => {
+        const lh = 4.5;
+        const cardH = 8 + lines.length * lh + 4;
+        pdf.setFillColor(...OLIVE);
+        pdf.roundedRect(x, cardY, cardW, 8, 1, 1, "F");
+        pdf.setFillColor(...CREAM);
+        pdf.roundedRect(x, cardY + 8, cardW, cardH - 8, 1, 1, "F");
+        pdf.setDrawColor(...GOLD);
+        pdf.setLineWidth(0.4);
+        pdf.roundedRect(x, cardY, cardW, cardH, 1, 1, "S");
 
-      // Draw Project Information Box
-      pdf.setDrawColor(150, 150, 150);
-      pdf.setLineWidth(0.3);
-      pdf.rect(leftColumnX, yPosition, boxWidth, projectBoxHeight);
-      
-      pdf.setFillColor(240, 240, 240);
-      pdf.rect(leftColumnX, yPosition, boxWidth, 8, 'F');
-      
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Información del Proyecto", leftColumnX + 3, yPosition + 5.5);
-      
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "normal");
-      let projectY = yPosition + 13;
-      if (project) {
-        const projectNameLines = pdf.splitTextToSize(`Nombre: ${project.title}`, boxWidth - 6);
-        projectNameLines.forEach((line: string) => {
-          pdf.text(line, leftColumnX + 3, projectY);
-          projectY += 4;
-        });
-        
-        const addressLines = pdf.splitTextToSize(`Dirección: ${project.address || "N/A"}`, boxWidth - 6);
-        addressLines.forEach((line: string) => {
-          pdf.text(line, leftColumnX + 3, projectY);
-          projectY += 4;
-        });
-      }
-
-      // Draw Client Information Box (Right)
-      pdf.rect(rightColumnX, yPosition, boxWidth, clientBoxHeight);
-      
-      pdf.setFillColor(240, 240, 240);
-      pdf.rect(rightColumnX, yPosition, boxWidth, 8, 'F');
-      
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Información del Cliente", rightColumnX + 3, yPosition + 5.5);
-      
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "normal");
-      let clientY = yPosition + 13;
-      if (client) {
-        pdf.text(`Nombre: ${client.name}`, rightColumnX + 3, clientY);
-        clientY += 4;
-        if (client.email) {
-          const emailLines = pdf.splitTextToSize(`Email: ${client.email}`, boxWidth - 6);
-          emailLines.forEach((line: string) => {
-            pdf.text(line, rightColumnX + 3, clientY);
-            clientY += 4;
-          });
-        }
-        if (client.phone) {
-          pdf.text(`Teléfono: ${client.phone}`, rightColumnX + 3, clientY);
-          clientY += 4;
-        }
-        if (client.address) {
-          const addressLines = pdf.splitTextToSize(`Dirección: ${client.address}`, boxWidth - 6);
-          addressLines.forEach((line: string) => {
-            pdf.text(line, rightColumnX + 3, clientY);
-            clientY += 4;
-          });
-        }
-      }
-
-      yPosition += Math.max(projectBoxHeight, clientBoxHeight) + 12;
-      checkNewPage(30);
-
-      // Scope of Work Section
-      if (quote.scopeOfWork && quote.scopeOfWork.trim()) {
-        pdf.setFillColor(245, 245, 245);
-        pdf.rect(margin, yPosition, pageWidth - (2 * margin), 8, 'F');
-        
-        pdf.setFontSize(12);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("Alcance del Trabajo", margin + 3, yPosition + 5.5);
-        yPosition += 12;
-
+        pdf.setTextColor(...WHITE);
         pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(title, x + 4, cardY + 5.5);
+
+        pdf.setTextColor(...DARK);
         pdf.setFont("helvetica", "normal");
-        const scopeLines = quote.scopeOfWork.split('\n');
-        const maxWidth = pageWidth - (2 * margin) - 6;
-        
-        scopeLines.forEach((line: string) => {
-          if (!line.trim()) {
-            yPosition += 3;
-            return;
-          }
-          
-          checkNewPage();
-          
-          const bulletRegex = /^[\s]*[•\-\*✓]\s*/;
-          if (bulletRegex.test(line)) {
-            const cleanLine = line.replace(bulletRegex, '').trim();
-            const wrappedLines = pdf.splitTextToSize(cleanLine, maxWidth - 8);
-            wrappedLines.forEach((wrappedLine: string, index: number) => {
-              checkNewPage();
-              if (index === 0) {
-                pdf.text('•', margin + 5, yPosition);
-                pdf.text(wrappedLine, margin + 10, yPosition);
-              } else {
-                pdf.text(wrappedLine, margin + 10, yPosition);
-              }
-              yPosition += 4.5;
-            });
+        pdf.setFontSize(8.5);
+        let ty = cardY + 13;
+        lines.forEach(line => {
+          const wrapped = pdf.splitTextToSize(line, cardW - 8);
+          wrapped.forEach((l: string) => { pdf.text(l, x + 4, ty); ty += lh; });
+        });
+        return cardH;
+      };
+
+      const clientLines: string[] = [];
+      if (client) {
+        clientLines.push(`Nombre: ${client.name}`);
+        if (client.phone)   clientLines.push(`Tel: ${client.phone}`);
+        if (client.email)   clientLines.push(`Email: ${client.email}`);
+        if (client.address) clientLines.push(`Dir: ${client.address}`);
+      } else {
+        clientLines.push("Sin cliente asignado");
+      }
+
+      const projectLines: string[] = [];
+      const workAddr = quote.workAddress || project?.address;
+      if (workAddr)        projectLines.push(`Dirección obra: ${workAddr}`);
+      if (project?.title)  projectLines.push(`Proyecto: ${project.title}`);
+      if (project?.serviceType) projectLines.push(`Tipo: ${project.serviceType}`);
+      if (projectLines.length === 0) projectLines.push("Cotización directa");
+
+      const h1 = drawCard(M,           "INFORMACIÓN DEL CLIENTE", clientLines, y);
+      const h2 = drawCard(M + cardW + 6, "INFORMACIÓN DEL PROYECTO", projectLines, y);
+      y += Math.max(h1, h2) + 8;
+
+      // ─── DESCRIPTION ─────────────────────────────────────────────────────────
+      const desc = quote.scopeOfWork || project?.description;
+      if (desc && desc.trim()) {
+        checkPage(20);
+        pdf.setFillColor(...OLIVE);
+        pdf.roundedRect(M, y, W - 2 * M, 7, 1, 1, "F");
+        pdf.setTextColor(...WHITE);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("DESCRIPCIÓN / ALCANCE DEL TRABAJO", M + 3, y + 5);
+        y += 10;
+
+        pdf.setTextColor(...DARK);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8.5);
+        const lines = pdf.splitTextToSize(desc.trim(), W - 2 * M - 4);
+        lines.forEach((l: string) => {
+          checkPage(6);
+          pdf.text(l, M + 2, y);
+          y += 4.5;
+        });
+        y += 4;
+      }
+
+      // ─── PARTIDAS TABLE ───────────────────────────────────────────────────────
+      const ext = quote.exteriorBreakdown || {};
+      const partidas: any[] = ext._pergoniaPartidas || [];
+      const servicios: any[] = (ext._pergoniaServicios || []).filter((s: any) => s.incluido);
+
+      if (partidas.length > 0 || servicios.length > 0) {
+        checkPage(24);
+
+        // Section header
+        pdf.setFillColor(...OLIVE);
+        pdf.roundedRect(M, y, W - 2 * M, 7, 1, 1, "F");
+        pdf.setTextColor(...WHITE);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("PARTIDAS Y CONCEPTOS DE OBRA", M + 3, y + 5);
+        y += 9;
+
+        // Column widths
+        const colDesc = 82;
+        const colUnit = 18;
+        const colQty  = 16;
+        const colPU   = 28;
+        const colSub  = 32;
+        const tblW    = colDesc + colUnit + colQty + colPU + colSub;
+        const tX      = M;
+
+        // Table header row
+        pdf.setFillColor(...GOLD);
+        pdf.rect(tX, y, tblW, 7, "F");
+        pdf.setTextColor(...WHITE);
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica", "bold");
+        let cx = tX + 2;
+        pdf.text("Descripción",    cx, y + 5); cx += colDesc;
+        pdf.text("Unidad",         cx, y + 5); cx += colUnit;
+        pdf.text("Cant.",          cx, y + 5); cx += colQty;
+        pdf.text("P. Unit.",       cx, y + 5); cx += colPU;
+        pdf.text("Subtotal",       cx, y + 5);
+        y += 7;
+
+        let subtotalSum = 0;
+        let rowIndex = 0;
+
+        const drawRow = (desc: string, unidad: string, cant: string | number, pu: string, sub: number, bold = false) => {
+          checkPage(8);
+          const descLines = pdf.splitTextToSize(String(desc), colDesc - 4);
+          const rowH = Math.max(6, descLines.length * 4.2 + 2);
+
+          // Alternating background
+          if (rowIndex % 2 === 0) {
+            pdf.setFillColor(...CREAM);
+            pdf.rect(tX, y, tblW, rowH, "F");
           } else {
-            const wrappedLines = pdf.splitTextToSize(line, maxWidth);
-            wrappedLines.forEach((wrappedLine: string) => {
-              checkNewPage();
-              pdf.text(wrappedLine, margin + 3, yPosition);
-              yPosition += 4.5;
-            });
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(tX, y, tblW, rowH, "F");
           }
+
+          // Grid lines
+          pdf.setDrawColor(...LTGRAY);
+          pdf.setLineWidth(0.2);
+          pdf.rect(tX, y, tblW, rowH, "S");
+
+          pdf.setTextColor(...DARK);
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", bold ? "bold" : "normal");
+
+          let rx = tX + 2;
+          descLines.forEach((l: string, i: number) => {
+            pdf.text(l, rx, y + 4.2 + i * 4.2);
+          });
+          rx += colDesc;
+          pdf.text(String(unidad), rx, y + 4.2); rx += colUnit;
+          pdf.text(String(cant),   rx, y + 4.2); rx += colQty;
+          pdf.text(pu,             rx, y + 4.2); rx += colPU;
+          pdf.text(fmtMXN(sub).replace(" MXN",""), rx, y + 4.2);
+
+          subtotalSum += sub;
+          y += rowH;
+          rowIndex++;
+        };
+
+        // Partidas rows
+        partidas.forEach((p: any) => {
+          const sub = Number(p.subtotal) || (Number(p.cantidad || 0) * Number(p.precioUnitario || 0));
+          const puLabel = p.precioUnitario ? fmtMXN(Number(p.precioUnitario)).replace(" MXN","") : "—";
+          drawRow(p.descripcion || "—", p.unidad || "—", p.cantidad ?? 1, puLabel, sub);
         });
 
-        yPosition += 8;
-      }
+        // Servicios rows (if any)
+        if (servicios.length > 0) {
+          checkPage(10);
+          // Sub-header
+          pdf.setFillColor(230, 240, 220);
+          pdf.rect(tX, y, tblW, 6, "F");
+          pdf.setTextColor(...OLIVE);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(8);
+          pdf.text("Servicios incluidos", tX + 2, y + 4);
+          y += 6;
+          rowIndex = 0;
 
-      // Project Description (if exists and different from scope)
-      if (project?.description && project.description.trim() && project.description !== quote.scopeOfWork) {
-        checkNewPage(20);
-        
-        pdf.setFillColor(245, 245, 245);
-        pdf.rect(margin, yPosition, pageWidth - (2 * margin), 8, 'F');
-        
-        pdf.setFontSize(12);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("Descripción del Proyecto", margin + 3, yPosition + 5.5);
-        yPosition += 12;
+          servicios.forEach((s: any) => {
+            drawRow(s.nombre || s.descripcion || "—", "Global", 1, fmtMXN(Number(s.precio || 0)).replace(" MXN",""), Number(s.precio || 0));
+          });
+        }
 
-        pdf.setFontSize(9);
+        // ─── TOTALS ───────────────────────────────────────────────────────────
+        checkPage(22);
+        y += 3;
+
+        const totalFinal = Number(quote.totalEstimate) || subtotalSum;
+        const totX = W - M - 70;
+        const totW = 70;
+
+        pdf.setFillColor(...CREAM);
+        pdf.roundedRect(totX, y, totW, 22, 1, 1, "F");
+        pdf.setDrawColor(...GOLD);
+        pdf.setLineWidth(0.5);
+        pdf.roundedRect(totX, y, totW, 22, 1, 1, "S");
+
+        pdf.setFontSize(8.5);
         pdf.setFont("helvetica", "normal");
-        const descLines = pdf.splitTextToSize(project.description, pageWidth - (2 * margin) - 6);
-        descLines.forEach((line: string) => {
-          checkNewPage();
-          pdf.text(line, margin + 3, yPosition);
-          yPosition += 4.5;
-        });
+        pdf.setTextColor(...GRAY);
+        pdf.text("Subtotal:", totX + 4, y + 7);
+        pdf.setTextColor(...DARK);
+        pdf.text(fmtMXN(subtotalSum), totX + totW - 4, y + 7, { align: "right" });
 
-        yPosition += 8;
-      }
-
-      // Add Project Images if available
-      if (project?.images && Array.isArray(project.images) && project.images.length > 0) {
-        checkNewPage(60);
-
-        pdf.setFillColor(245, 245, 245);
-        pdf.rect(margin, yPosition, pageWidth - (2 * margin), 8, 'F');
-        
+        pdf.setFillColor(...OLIVE);
+        pdf.rect(totX, y + 11, totW, 11, "F");
+        pdf.setFontSize(10);
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(12);
-        pdf.text("Imágenes del Proyecto", margin + 3, yPosition + 5.5);
-        yPosition += 15;
+        pdf.setTextColor(...WHITE);
+        pdf.text("TOTAL:", totX + 4, y + 18);
+        pdf.setTextColor(...GOLD);
+        pdf.text(fmtMXN(totalFinal), totX + totW - 4, y + 18, { align: "right" });
 
-        // Add each image
-        const imgWidth = 65;
-        const imgHeight = 50;
-        const imagesPerRow = 2;
-        const horizontalGap = 10;
-        let currentCol = 0;
-
-        for (let i = 0; i < project.images.length; i++) {
-          try {
-            const xPos = margin + (currentCol * (imgWidth + horizontalGap));
-
-            if (yPosition + imgHeight > pageHeight - margin) {
-              pdf.addPage();
-              yPosition = margin;
-              
-              pdf.setFillColor(245, 245, 245);
-              pdf.rect(margin, yPosition, pageWidth - (2 * margin), 8, 'F');
-              pdf.setFont("helvetica", "bold");
-              pdf.setFontSize(12);
-              pdf.text("Imágenes del Proyecto (continuación)", margin + 3, yPosition + 5.5);
-              yPosition += 15;
-            }
-
-            pdf.addImage(
-              project.images[i],
-              'JPEG',
-              xPos,
-              yPosition,
-              imgWidth,
-              imgHeight,
-              undefined,
-              'NONE',
-              0
-            );
-
-            pdf.setDrawColor(200, 200, 200);
-            pdf.setLineWidth(0.3);
-            pdf.rect(xPos, yPosition, imgWidth, imgHeight);
-
-            currentCol++;
-            if (currentCol >= imagesPerRow) {
-              currentCol = 0;
-              yPosition += imgHeight + 8;
-            }
-          } catch (error) {
-            console.error("Error adding image to PDF:", error);
-          }
-        }
-
-        if (currentCol !== 0) {
-          yPosition += imgHeight + 8;
-        }
-
-        yPosition += 5;
+        y += 28;
+      } else {
+        // Fallback: just show total
+        checkPage(18);
+        const totX = W - M - 70;
+        const totW = 70;
+        pdf.setFillColor(...OLIVE);
+        pdf.roundedRect(totX, y, totW, 11, 1, 1, "F");
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(...WHITE);
+        pdf.text("TOTAL:", totX + 4, y + 7.5);
+        pdf.setTextColor(...GOLD);
+        pdf.text(fmtMXN(Number(quote.totalEstimate)), totX + totW - 4, y + 7.5, { align: "right" });
+        y += 16;
       }
 
-      // Total Section
-      checkNewPage(25);
-      
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 8;
+      // ─── NOTES ───────────────────────────────────────────────────────────────
+      if (quote.notes && quote.notes.trim()) {
+        checkPage(18);
+        pdf.setFillColor(...CREAM);
+        pdf.roundedRect(M, y, W - 2 * M, 7, 1, 1, "F");
+        pdf.setDrawColor(...GOLD);
+        pdf.setLineWidth(0.3);
+        pdf.roundedRect(M, y, W - 2 * M, 7, 1, 1, "S");
+        pdf.setTextColor(...OLIVE);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("NOTAS Y CONDICIONES", M + 3, y + 5);
+        y += 10;
+        pdf.setTextColor(...DARK);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8.5);
+        const nLines = pdf.splitTextToSize(quote.notes.trim(), W - 2 * M - 4);
+        nLines.forEach((l: string) => { checkPage(6); pdf.text(l, M + 2, y); y += 4.5; });
+        y += 4;
+      }
 
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Costo Total del Proyecto:", margin, yPosition);
-      pdf.text(`$${Number(quote.totalEstimate).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`, rightX, yPosition, { align: 'right' });
-
-      yPosition += 15;
-
-      // Footer
-      checkNewPage(15);
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.3);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 6;
-
-      pdf.setFontSize(9);
+      // ─── FOOTER ──────────────────────────────────────────────────────────────
+      const footerY = H - 14;
+      pdf.setFillColor(...OLIVE);
+      pdf.rect(0, footerY, W, 14, "F");
+      pdf.setFillColor(...GOLD);
+      pdf.rect(0, footerY, W, 1, "F");
+      pdf.setTextColor(230, 220, 200);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(100, 100, 100);
-      pdf.text("¡Gracias por confiar en Pergonia — Arquitectura Exterior!", margin, yPosition);
-      yPosition += 5;
-      pdf.text("Esta cotización tiene una vigencia de 30 días a partir de la fecha indicada.", margin, yPosition);
+      pdf.text("¡Gracias por confiar en Pergonia — Arquitectura Exterior!", W / 2, footerY + 6, { align: "center" });
+      pdf.text("Esta cotización tiene vigencia de 30 días a partir de la fecha indicada.", W / 2, footerY + 11, { align: "center" });
 
-      // Save the PDF
-      const fileName = `Quote-${quote.id}-${project?.title?.substring(0, 30) || 'Project'}.pdf`;
-      pdf.save(fileName);
+      const name = client?.name || project?.title || "cliente";
+      pdf.save(`Cotizacion-${quote.id}-${name.substring(0, 25)}.pdf`);
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({
