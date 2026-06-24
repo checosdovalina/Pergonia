@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Eye, Edit, Trash2, FileDown, List, Grid3X3, Search, X, FileText, CheckCircle, Clock, XCircle, Send } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, FileDown, List, Grid3X3, Search, X, FileText, CheckCircle, Clock, XCircle, Send, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -85,6 +85,20 @@ export default function SimpleQuotes() {
     .reduce((s: number, q: any) => s + Number(q.totalEstimate || 0), 0);
 
   const getProject = (id: number) => (projects as any[]).find((p: any) => p.id === id);
+
+  // WhatsApp share — abre WhatsApp con mensaje pre-escrito
+  const handleWhatsApp = (q: any) => {
+    const cl = getClientForQuote(q);
+    const phone = cl?.phone?.replace(/\D/g, "");
+    const total = `$${Number(q.totalEstimate || 0).toLocaleString("es-MX")} MXN`;
+    const name  = cl?.name || "estimado cliente";
+    const addr  = q.workAddress ? `\n📍 Dirección: ${q.workAddress}` : "";
+    const msg   = `Hola ${name}, le comparto la *Cotización #${q.id}* de Pergonia — Arquitectura Exterior.${addr}\n💰 Total: *${total}*\n\nPor favor confirme si tiene alguna duda o si desea proceder. ¡Estamos a sus órdenes!`;
+    const url   = phone
+      ? `https://wa.me/52${phone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  };
 
   const handleNewQuote = () => { setQuoteToEdit(null); setShowQuoteForm(true); };
   const handleEditQuote = (q: any) => { setQuoteToEdit(q); setShowQuoteForm(true); };
@@ -273,14 +287,21 @@ export default function SimpleQuotes() {
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost" size="sm"
+                            className="text-[#25D366] hover:text-[#1ebe5d] hover:bg-green-50"
+                            onClick={() => handleWhatsApp(q)}
+                            title="Enviar por WhatsApp"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-3.5 h-3.5 fill-current">
+                              <path d="M16 .5C7.44.5.5 7.44.5 16c0 2.83.74 5.49 2.04 7.8L.5 31.5l7.94-2.08A15.46 15.46 0 0016 31.5C24.56 31.5 31.5 24.56 31.5 16S24.56.5 16 .5zm7.24 18.32c-.4-.2-2.35-1.16-2.71-1.29-.36-.13-.62-.2-.88.2s-1.01 1.29-1.24 1.55c-.23.26-.46.3-.86.1-.4-.2-1.69-.62-3.22-1.98-1.19-1.06-1.99-2.36-2.22-2.76-.23-.4-.02-.61.17-.81.18-.18.4-.46.6-.69.2-.23.26-.4.4-.66.13-.27.07-.5-.03-.7-.1-.2-.88-2.12-1.2-2.9-.32-.76-.64-.66-.88-.67h-.75c-.26 0-.69.1-1.05.49-.36.4-1.37 1.34-1.37 3.27s1.4 3.79 1.6 4.05c.2.26 2.76 4.21 6.68 5.91 4.69 2 4.69 1.33 5.53 1.25.84-.08 2.71-1.11 3.09-2.18.38-1.07.38-1.99.27-2.18-.11-.2-.37-.3-.77-.5z"/>
+                            </svg>
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => setViewingQuote(q)} title="Ver detalle">
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleEditQuote(q)} title="Editar">
                             <Edit className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleExportTxt(q)} title="Exportar">
-                            <FileDown className="w-3.5 h-3.5" />
                           </Button>
                           <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => setQuoteToDelete(q)} title="Eliminar">
                             <Trash2 className="w-3.5 h-3.5" />
@@ -328,14 +349,21 @@ export default function SimpleQuotes() {
                   </div>
 
                   <div className="flex gap-1.5 pt-1 border-t">
+                    <Button
+                      size="sm"
+                      className="flex-1 gap-1 text-xs bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0"
+                      onClick={() => handleWhatsApp(q)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-3 h-3 fill-white shrink-0">
+                        <path d="M16 .5C7.44.5.5 7.44.5 16c0 2.83.74 5.49 2.04 7.8L.5 31.5l7.94-2.08A15.46 15.46 0 0016 31.5C24.56 31.5 31.5 24.56 31.5 16S24.56.5 16 .5zm7.24 18.32c-.4-.2-2.35-1.16-2.71-1.29-.36-.13-.62-.2-.88.2s-1.01 1.29-1.24 1.55c-.23.26-.46.3-.86.1-.4-.2-1.69-.62-3.22-1.98-1.19-1.06-1.99-2.36-2.22-2.76-.23-.4-.02-.61.17-.81.18-.18.4-.46.6-.69.2-.23.26-.4.4-.66.13-.27.07-.5-.03-.7-.1-.2-.88-2.12-1.2-2.9-.32-.76-.64-.66-.88-.67h-.75c-.26 0-.69.1-1.05.49-.36.4-1.37 1.34-1.37 3.27s1.4 3.79 1.6 4.05c.2.26 2.76 4.21 6.68 5.91 4.69 2 4.69 1.33 5.53 1.25.84-.08 2.71-1.11 3.09-2.18.38-1.07.38-1.99.27-2.18-.11-.2-.37-.3-.77-.5z"/>
+                      </svg>
+                      WhatsApp
+                    </Button>
                     <Button variant="outline" size="sm" className="flex-1 gap-1 text-xs" onClick={() => setViewingQuote(q)}>
                       <Eye className="w-3 h-3" /> Ver
                     </Button>
                     <Button variant="outline" size="sm" className="flex-1 gap-1 text-xs" onClick={() => handleEditQuote(q)}>
                       <Edit className="w-3 h-3" /> Editar
-                    </Button>
-                    <Button variant="outline" size="sm" className="px-2" onClick={() => handleExportTxt(q)}>
-                      <FileDown className="w-3 h-3" />
                     </Button>
                     <Button variant="outline" size="sm" className="px-2 text-red-500 hover:text-red-700" onClick={() => setQuoteToDelete(q)}>
                       <Trash2 className="w-3 h-3" />

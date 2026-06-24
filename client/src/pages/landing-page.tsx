@@ -651,6 +651,24 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── BOTÓN FLOTANTE WHATSAPP ── */}
+      <a
+        href={`https://wa.me/${SUCURSALES[0].whatsapp.replace("https://wa.me/", "")}?text=${encodeURIComponent("Hola, me interesa un proyecto con Pergonia Arquitectura Exterior. ¿Me pueden dar más información?")}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white pl-4 pr-5 py-3 rounded-full shadow-xl transition-all duration-200 hover:scale-105 group"
+        aria-label="Contactar por WhatsApp"
+      >
+        {/* WhatsApp SVG icon */}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 fill-white shrink-0">
+          <path d="M16 .5C7.44.5.5 7.44.5 16c0 2.83.74 5.49 2.04 7.8L.5 31.5l7.94-2.08A15.46 15.46 0 0016 31.5C24.56 31.5 31.5 24.56 31.5 16S24.56.5 16 .5zm0 28.2a13.18 13.18 0 01-6.73-1.84l-.48-.29-4.71 1.24 1.26-4.6-.32-.5A13.2 13.2 0 1116 28.7zm7.24-9.88c-.4-.2-2.35-1.16-2.71-1.29-.36-.13-.62-.2-.88.2s-1.01 1.29-1.24 1.55c-.23.26-.46.3-.86.1-.4-.2-1.69-.62-3.22-1.98-1.19-1.06-1.99-2.36-2.22-2.76-.23-.4-.02-.61.17-.81.18-.18.4-.46.6-.69.2-.23.26-.4.4-.66.13-.27.07-.5-.03-.7-.1-.2-.88-2.12-1.2-2.9-.32-.76-.64-.66-.88-.67h-.75c-.26 0-.69.1-1.05.49-.36.4-1.37 1.34-1.37 3.27s1.4 3.79 1.6 4.05c.2.26 2.76 4.21 6.68 5.91 4.69 2 4.69 1.33 5.53 1.25.84-.08 2.71-1.11 3.09-2.18.38-1.07.38-1.99.27-2.18-.11-.2-.37-.3-.77-.5z"/>
+        </svg>
+        <span className="text-sm font-semibold leading-tight">
+          <span className="block text-xs font-normal opacity-90">¿Tienes un proyecto?</span>
+          Escríbenos
+        </span>
+      </a>
+
       {/* ── FOOTER ── */}
       <footer className="bg-[#2d3a1d] text-[#f5f0e8]/50 py-12 px-4">
         <div className="max-w-6xl mx-auto">

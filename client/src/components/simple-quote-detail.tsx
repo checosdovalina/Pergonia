@@ -652,6 +652,28 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                   </Button>
                 )}
 
+                {/* WhatsApp */}
+                <Button
+                  size="sm"
+                  className="bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0 gap-1.5"
+                  onClick={() => {
+                    const phone = client?.phone?.replace(/\D/g, "");
+                    const total = `$${Number(quote.totalEstimate || 0).toLocaleString("es-MX")} MXN`;
+                    const name  = client?.name || "estimado cliente";
+                    const addr  = quote.workAddress ? `\n📍 Dirección: ${quote.workAddress}` : "";
+                    const msg   = `Hola ${name}, le comparto la *Cotización #${quote.id}* de Pergonia — Arquitectura Exterior.${addr}\n💰 Total: *${total}*\n\nPor favor confirme si tiene alguna duda o si desea proceder. ¡Estamos a sus órdenes!`;
+                    const url   = phone
+                      ? `https://wa.me/52${phone}?text=${encodeURIComponent(msg)}`
+                      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                    window.open(url, "_blank");
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-4 h-4 fill-white shrink-0">
+                    <path d="M16 .5C7.44.5.5 7.44.5 16c0 2.83.74 5.49 2.04 7.8L.5 31.5l7.94-2.08A15.46 15.46 0 0016 31.5C24.56 31.5 31.5 24.56 31.5 16S24.56.5 16 .5zm7.24 18.32c-.4-.2-2.35-1.16-2.71-1.29-.36-.13-.62-.2-.88.2s-1.01 1.29-1.24 1.55c-.23.26-.46.3-.86.1-.4-.2-1.69-.62-3.22-1.98-1.19-1.06-1.99-2.36-2.22-2.76-.23-.4-.02-.61.17-.81.18-.18.4-.46.6-.69.2-.23.26-.4.4-.66.13-.27.07-.5-.03-.7-.1-.2-.88-2.12-1.2-2.9-.32-.76-.64-.66-.88-.67h-.75c-.26 0-.69.1-1.05.49-.36.4-1.37 1.34-1.37 3.27s1.4 3.79 1.6 4.05c.2.26 2.76 4.21 6.68 5.91 4.69 2 4.69 1.33 5.53 1.25.84-.08 2.71-1.11 3.09-2.18.38-1.07.38-1.99.27-2.18-.11-.2-.37-.3-.77-.5z"/>
+                  </svg>
+                  WhatsApp
+                </Button>
+
                 <Button
                   variant="outline"
                   size="sm"
