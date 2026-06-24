@@ -711,43 +711,66 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
           {/* Project and Client Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Proyecto</h3>
-              <div className="space-y-3">
-                <div>
-                  <span className="font-medium text-gray-700">Nombre:</span>
-                  <p className="text-gray-900">{project?.title || "N/A"}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Dirección:</span>
-                  <p className="text-gray-900">{project?.address || "N/A"}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Descripción:</span>
-                  <p className="text-gray-900">{project?.description || "N/A"}</p>
-                </div>
-              </div>
-            </div>
-
+            {/* LEFT: Client info */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Cliente</h3>
               <div className="space-y-3">
                 <div>
                   <span className="font-medium text-gray-700">Nombre:</span>
-                  <p className="text-gray-900">{client?.name || "N/A"}</p>
+                  <p className="text-gray-900">{client?.name || "—"}</p>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Email:</span>
-                  <p className="text-gray-900">{client?.email || "N/A"}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Teléfono:</span>
-                  <p className="text-gray-900">{client?.phone || "N/A"}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Dirección:</span>
-                  <p className="text-gray-900">{client?.address || "N/A"}</p>
-                </div>
+                {client?.email && (
+                  <div>
+                    <span className="font-medium text-gray-700">Email:</span>
+                    <p className="text-gray-900">{client.email}</p>
+                  </div>
+                )}
+                {client?.phone && (
+                  <div>
+                    <span className="font-medium text-gray-700">Teléfono:</span>
+                    <p className="text-gray-900">{client.phone}</p>
+                  </div>
+                )}
+                {client?.address && (
+                  <div>
+                    <span className="font-medium text-gray-700">Dirección cliente:</span>
+                    <p className="text-gray-900">{client.address}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT: Work / Project info */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Datos de la Obra</h3>
+              <div className="space-y-3">
+                {(quote.workAddress || project?.address) && (
+                  <div>
+                    <span className="font-medium text-gray-700">Dirección de la obra:</span>
+                    <p className="text-gray-900">{quote.workAddress || project?.address}</p>
+                  </div>
+                )}
+                {project?.title && (
+                  <div>
+                    <span className="font-medium text-gray-700">Proyecto:</span>
+                    <p className="text-gray-900">{project.title}</p>
+                  </div>
+                )}
+                {project?.serviceType && (
+                  <div>
+                    <span className="font-medium text-gray-700">Tipo:</span>
+                    <p className="text-gray-900">{project.serviceType}</p>
+                  </div>
+                )}
+                {project?.description && (
+                  <div>
+                    <span className="font-medium text-gray-700">Descripción:</span>
+                    <p className="text-gray-900">{project.description}</p>
+                  </div>
+                )}
+                {!quote.workAddress && !project && (
+                  <p className="text-gray-500 text-sm">Sin dirección de obra registrada</p>
+                )}
               </div>
             </div>
           </div>
