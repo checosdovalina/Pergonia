@@ -152,7 +152,9 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
       }
 
       const res = await apiRequest("POST", "/api/service-orders", {
-        projectId: quote.projectId,
+        projectId: quote.projectId || undefined,
+        clientId: client?.id || quote.clientId || undefined,
+        workAddress: quote.workAddress || project?.address || "",
         quoteId: quote.id,
         details: serviceOrderDetails.trim(),
         status: "pending",

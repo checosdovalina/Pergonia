@@ -684,29 +684,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/service-orders", isAuthenticated, async (req, res) => {
     try {
-      const serviceOrderData = insertServiceOrderSchema.parse(req.body);
-      
+      // Allow projectId to be null/missing — we'll auto-create a project if needed
+      const body = req.body;
+      let resolvedProjectId: number = body.projectId;
+
+      if (!resolvedProjectId) {
+        // Try to resolve via the linked quote
+        const quote = body.quoteId ? await storage.getQuote(body.quoteId) : null;
+        const clientId = body.clientId || quote?.clientId;
+
+        if (!clientId) {
+          return res.status(400).json({ message: "Se requiere un cliente o proyecto para crear la orden de servicio." });
+        }
+
+        // Auto-create a project for this client
+        const autoProject = await storage.createProject({
+          clientId,
+          title: body.workAddress || quote?.workAddress || `Proyecto Cliente #${clientId}`,
+          address: body.workAddress || quote?.workAddress || "",
+          status: "in_progress",
+          description: "Proyecto creado automáticamente al convertir cotización a orden de servicio.",
+          totalCost: quote?.totalEstimate ? Number(quote.totalEstimate) : 0,
+        });
+        resolvedProjectId = autoProject.id;
+
+        // Link the quote to this project
+        if (quote?.id) {
+          await storage.updateQuote(quote.id, { projectId: resolvedProjectId });
+        }
+      }
+
+      const serviceOrderData = insertServiceOrderSchema.parse({
+        ...body,
+        projectId: resolvedProjectId,
+      });
+
       // Get project to inherit images and documents if not already provided
-      const project = await storage.getProject(serviceOrderData.projectId);
-      
-      // Use provided images/documents or inherit from project
+      const project = await storage.getProject(resolvedProjectId);
+
       const serviceOrderWithInheritedFiles = {
         ...serviceOrderData,
         images: serviceOrderData.images || project?.images || null,
         documents: serviceOrderData.documents || project?.documents || null,
       };
-      
+
       const serviceOrder = await storage.createServiceOrder(serviceOrderWithInheritedFiles);
-      
+
       // Create activity for service order creation
       await storage.createActivity({
         type: "service_order_created",
-        description: `New service order created for project "${project?.title || 'Unknown'}"`,
+        description: `Nueva orden de servicio creada para "${project?.title || 'Proyecto'}"`,
         userId: req.user.id,
         projectId: serviceOrder.projectId,
         clientId: project?.clientId
       });
-      
+
       res.status(201).json(serviceOrder);
     } catch (error) {
       if (error instanceof z.ZodError) {
