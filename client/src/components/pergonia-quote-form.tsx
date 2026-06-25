@@ -311,7 +311,8 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
                       <div className="col-span-5">
                         <FormField control={form.control} name={`partidas.${i}.descripcion`}
                           render={({ field: f }) => (
-                            <Input {...f} placeholder="Ej. Obra negra, Tema eléctrico…" className="h-8 text-sm font-medium" />
+                            <Input {...f} placeholder="Ej. Obra negra, Tema eléctrico…" className="h-8 text-sm font-medium"
+                              onKeyDown={e => { if (e.key === "Enter") e.preventDefault(); }} />
                           )} />
                       </div>
 
@@ -392,6 +393,12 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
                                       cur[j] = e.target.value;
                                       form.setValue(`partidas.${i}.subItems`, cur);
                                     }}
+                                    onKeyDown={e => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        agregarSubItem(i);
+                                      }
+                                    }}
                                   />
                                   <Button type="button" variant="ghost" size="sm"
                                     className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
@@ -412,6 +419,7 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
                             placeholder="Ej. Materiales proporcionados por el cliente, incluye garantía de 1 año…"
                             value={nota}
                             onChange={e => form.setValue(`partidas.${i}.nota`, e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") e.preventDefault(); }}
                           />
                         </div>
                       </div>
