@@ -472,9 +472,32 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
 
         // Partidas rows
         partidas.forEach((p: any) => {
-          const sub = Number(p.subtotal) || (Number(p.cantidad || 0) * Number(p.precioUnitario || 0));
+          const sub = Number(p.subtotal) || (Number(p.cantidad || 1) * Number(p.precioUnitario || 0));
           const puLabel = p.precioUnitario ? fmtMXN(Number(p.precioUnitario)).replace(" MXN","") : "—";
           drawRow(p.descripcion || "—", p.unidad || "—", p.cantidad ?? 1, puLabel, sub);
+
+          // Sub-conceptos
+          const subItems: string[] = p.subItems || [];
+          subItems.forEach((si: string) => {
+            if (!si) return;
+            checkPage(5);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(7.5);
+            pdf.setTextColor(...GRAY);
+            pdf.text(`   • ${si}`, tX + 3, y + 3.5);
+            y += 5;
+          });
+
+          // Nota / condición por partida
+          if (p.nota) {
+            checkPage(5);
+            pdf.setFont("helvetica", "italic");
+            pdf.setFontSize(7);
+            pdf.setTextColor(160, 130, 60); // dorado suave
+            pdf.text(`   ★ ${p.nota}`, tX + 3, y + 3.5);
+            y += 5;
+            pdf.setFont("helvetica", "normal");
+          }
         });
 
         // Servicios rows (if any)
@@ -836,18 +859,38 @@ export function SimpleQuoteDetail({ open, onOpenChange, quote, onEdit }: SimpleQ
                       </div>
                       <div className="divide-y">
                         {partidas.map((p: any, i: number) => {
-                          const sub = (p.cantidad || 0) * (p.precioUnitario || 0);
+                          const sub = (p.cantidad || 1) * (p.precioUnitario || 0);
+                          const subItems: string[] = p.subItems || [];
                           return (
-                            <div key={i} className="grid grid-cols-12 gap-1 px-4 py-2.5 text-sm">
-                              <div className="col-span-5 font-medium text-gray-900">{p.descripcion}</div>
-                              <div className="col-span-2 text-center text-gray-500">{p.unidad}</div>
-                              <div className="col-span-2 text-right text-gray-700">{p.cantidad}</div>
-                              <div className="col-span-1 text-right text-gray-700">
-                                ${Number(p.precioUnitario || 0).toLocaleString("es-MX")}
+                            <div key={i}>
+                              <div className="grid grid-cols-12 gap-1 px-4 py-2.5 text-sm">
+                                <div className="col-span-5 font-medium text-gray-900">{p.descripcion}</div>
+                                <div className="col-span-2 text-center text-gray-500">{p.unidad}</div>
+                                <div className="col-span-2 text-right text-gray-700">{p.cantidad}</div>
+                                <div className="col-span-1 text-right text-gray-700">
+                                  ${Number(p.precioUnitario || 0).toLocaleString("es-MX")}
+                                </div>
+                                <div className="col-span-2 text-right font-semibold text-[#4a5e30]">
+                                  ${sub.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                                </div>
                               </div>
-                              <div className="col-span-2 text-right font-semibold text-[#4a5e30]">
-                                ${sub.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                              </div>
+                              {/* Sub-conceptos */}
+                              {subItems.filter(Boolean).length > 0 && (
+                                <ul className="px-6 pb-2 space-y-0.5">
+                                  {subItems.filter(Boolean).map((si: string, j: number) => (
+                                    <li key={j} className="flex items-start gap-1.5 text-xs text-gray-500">
+                                      <span className="text-[#4a5e30] mt-px">•</span>
+                                      <span>{si}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                              {/* Nota por partida */}
+                              {p.nota && (
+                                <p className="px-6 pb-2.5 text-[11px] italic text-amber-700">
+                                  ★ {p.nota}
+                                </p>
+                              )}
                             </div>
                           );
                         })}

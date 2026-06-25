@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Plus, Trash2, Calculator, Users } from "lucide-react";
+import { Plus, Trash2, Calculator, Users, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,27 +32,29 @@ const SERVICIOS = [
   { id: "otro",         label: "Otro",             desc: "Servicio personalizado" },
 ];
 
-const UNIDADES = ["m²", "ml", "m³", "pieza", "juego", "global", "hora", "kg"];
+const UNIDADES = ["global", "m²", "ml", "m³", "pieza", "juego", "hora", "kg"];
 
 // ── Schema ──────────────────────────────────────────────────────────────────
 const partidaSchema = z.object({
-  descripcion:   z.string().min(1, "Requerido"),
-  unidad:        z.string().default("global"),
-  cantidad:      z.number().min(0).default(1),
+  descripcion:    z.string().min(1, "Requerido"),
+  unidad:         z.string().default("global"),
+  cantidad:       z.number().min(0).default(1),
   precioUnitario: z.number().min(0).default(0),
-  subtotal:      z.number().default(0),
+  subtotal:       z.number().default(0),
+  subItems:       z.array(z.string()).default([]),   // sub-conceptos tipo bullet
+  nota:           z.string().optional(),             // condición / nota por partida
 });
 
 const formSchema = z.object({
-  clientId:     z.number().min(1, "Selecciona un cliente"),
-  workAddress:  z.string().optional(),
-  servicios:    z.array(z.string()).min(1, "Selecciona al menos un tipo de servicio"),
-  partidas:     z.array(partidaSchema).default([]),
-  scopeOfWork:  z.string().optional(),
+  clientId:      z.number().min(1, "Selecciona un cliente"),
+  workAddress:   z.string().optional(),
+  servicios:     z.array(z.string()).min(1, "Selecciona al menos un tipo de servicio"),
+  partidas:      z.array(partidaSchema).default([]),
+  scopeOfWork:   z.string().optional(),
   totalEstimate: z.number().min(0).default(0),
-  notes:        z.string().optional(),
-  validUntil:   z.date().optional(),
-  sentDate:     z.date().optional(),
+  notes:         z.string().optional(),
+  validUntil:    z.date().optional(),
+  sentDate:      z.date().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,6 +69,7 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const [showClientForm, setShowClientForm] = useState(false);
   const [validUntilOpen, setValidUntilOpen] = useState(false);
   const [sentDateOpen,   setSentDateOpen]   = useState(false);
+  const [expandedRows, setExpandedRows]     = useState<Set<number>>(new Set());
 
   const { data: clients = [] } = useQuery({ queryKey: ["/api/clients"] });
 
@@ -90,52 +93,69 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clientId:     initialData?.clientId || 0,
-      workAddress:  initialData?.workAddress || "",
-      servicios:    getInitialServicios(),
-      partidas:     getInitialPartidas(),
-      scopeOfWork:  initialData?.scopeOfWork || "",
+      clientId:      initialData?.clientId || 0,
+      workAddress:   initialData?.workAddress || "",
+      servicios:     getInitialServicios(),
+      partidas:      getInitialPartidas(),
+      scopeOfWork:   initialData?.scopeOfWork || "",
       totalEstimate: Number(initialData?.totalEstimate || 0),
-      notes:        initialData?.notes || "",
-      validUntil:   initialData?.validUntil ? new Date(initialData.validUntil) : undefined,
-      sentDate:     initialData?.sentDate   ? new Date(initialData.sentDate)   : undefined,
+      notes:         initialData?.notes || "",
+      validUntil:    initialData?.validUntil ? new Date(initialData.validUntil) : undefined,
+      sentDate:      initialData?.sentDate   ? new Date(initialData.sentDate)   : undefined,
     },
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "partidas" });
 
-  // Calculate total from partidas
   const calcularTotal = () => {
     const partidas = form.getValues("partidas");
-    const total = partidas.reduce((acc, p) => acc + (p.cantidad * p.precioUnitario), 0);
+    const total = partidas.reduce((acc, p) => acc + ((p.cantidad || 1) * (p.precioUnitario || 0)), 0);
     form.setValue("totalEstimate", total);
   };
 
   const actualizarSubtotal = (index: number) => {
     const p = form.getValues(`partidas.${index}`);
-    const sub = (p.cantidad || 0) * (p.precioUnitario || 0);
+    const sub = (p.cantidad || 1) * (p.precioUnitario || 0);
     form.setValue(`partidas.${index}.subtotal`, sub);
     calcularTotal();
   };
 
   const agregarPartida = () => {
-    append({ descripcion: "", unidad: "global", cantidad: 1, precioUnitario: 0, subtotal: 0 });
+    append({ descripcion: "", unidad: "global", cantidad: 1, precioUnitario: 0, subtotal: 0, subItems: [], nota: "" });
+  };
+
+  const toggleExpand = (i: number) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
+
+  // Agregar / quitar sub-concepto
+  const agregarSubItem = (i: number) => {
+    const cur = form.getValues(`partidas.${i}.subItems`) || [];
+    form.setValue(`partidas.${i}.subItems`, [...cur, ""]);
+  };
+  const quitarSubItem = (i: number, j: number) => {
+    const cur = form.getValues(`partidas.${i}.subItems`) || [];
+    form.setValue(`partidas.${i}.subItems`, cur.filter((_: string, idx: number) => idx !== j));
   };
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
       const payload = {
-        clientId:     data.clientId,
-        projectId:    null,
-        workAddress:  data.workAddress || "",
+        clientId:      data.clientId,
+        projectId:     null,
+        workAddress:   data.workAddress || "",
         totalEstimate: data.totalEstimate,
-        scopeOfWork:  data.scopeOfWork || "",
-        notes:        data.notes || "",
-        validUntil:   data.validUntil  ? data.validUntil.toISOString()  : null,
-        sentDate:     data.sentDate    ? data.sentDate.toISOString()    : null,
-        status:       "draft",
-        isInterior:   false,
-        isExterior:   false,
+        scopeOfWork:   data.scopeOfWork || "",
+        notes:         data.notes || "",
+        validUntil:    data.validUntil  ? data.validUntil.toISOString()  : null,
+        sentDate:      data.sentDate    ? data.sentDate.toISOString()    : null,
+        status:        "draft",
+        isInterior:    false,
+        isExterior:    false,
         isSpecialRequirements: false,
         interiorBreakdown: null,
         specialRequirements: null,
@@ -173,9 +193,8 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
     toast({ title: "Cliente creado" });
   };
 
-  const totalEstimate = form.watch("totalEstimate");
   const partidas = form.watch("partidas");
-  const totalCalculado = partidas.reduce((acc, p) => acc + ((p.cantidad || 0) * (p.precioUnitario || 0)), 0);
+  const totalCalculado = partidas.reduce((acc, p) => acc + ((p.cantidad || 1) * (p.precioUnitario || 0)), 0);
 
   return (
     <Form {...form}>
@@ -183,7 +202,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
 
         {/* ── Cliente + Dirección ─────────────────────────────────────────── */}
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Cliente */}
           <FormField control={form.control} name="clientId" render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
@@ -210,7 +228,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
             </FormItem>
           )} />
 
-          {/* Dirección del trabajo */}
           <FormField control={form.control} name="workAddress" render={({ field }) => (
             <FormItem>
               <FormLabel>Dirección del Trabajo</FormLabel>
@@ -262,7 +279,7 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold">Partidas de Obra</h3>
-              <p className="text-xs text-muted-foreground">Desglose detallado del trabajo a realizar</p>
+              <p className="text-xs text-muted-foreground">Cada partida puede tener sub-conceptos y notas</p>
             </div>
             <Button type="button" variant="outline" size="sm" onClick={agregarPartida}
               className="gap-1 text-xs">
@@ -272,100 +289,159 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
 
           {fields.length === 0 ? (
             <div className="border-2 border-dashed rounded-lg p-6 text-center">
-              <p className="text-sm text-muted-foreground">Sin partidas. Agrega conceptos de trabajo.</p>
-              <Button type="button" variant="outline" size="sm" className="mt-2 gap-1"
+              <p className="text-sm text-muted-foreground mb-2">Sin partidas. Agrega los conceptos de trabajo.</p>
+              <Button type="button" variant="outline" size="sm" className="gap-1"
                 onClick={agregarPartida}>
                 <Plus className="w-3.5 h-3.5" /> Agregar primera partida
               </Button>
             </div>
           ) : (
-            <div className="border rounded-lg overflow-hidden">
-              {/* Header */}
-              <div className="bg-gray-50 grid grid-cols-12 gap-1 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                <div className="col-span-4">Descripción</div>
-                <div className="col-span-2">Unidad</div>
-                <div className="col-span-2 text-right">Cantidad</div>
-                <div className="col-span-2 text-right">P. Unit.</div>
-                <div className="col-span-1 text-right">Subtotal</div>
-                <div className="col-span-1"></div>
-              </div>
+            <div className="space-y-2">
+              {fields.map((field, i) => {
+                const isExpanded = expandedRows.has(i);
+                const subItems: string[] = form.watch(`partidas.${i}.subItems`) || [];
+                const nota: string = form.watch(`partidas.${i}.nota`) || "";
+                const monto = (form.watch(`partidas.${i}.cantidad`) || 1) * (form.watch(`partidas.${i}.precioUnitario`) || 0);
 
-              {/* Rows */}
-              <div className="divide-y">
-                {fields.map((field, i) => (
-                  <div key={field.id} className="grid grid-cols-12 gap-1 px-3 py-2 items-center">
-                    {/* Descripción */}
-                    <div className="col-span-4">
-                      <FormField control={form.control} name={`partidas.${i}.descripcion`}
-                        render={({ field: f }) => (
-                          <Input {...f} placeholder="Ej. Construcción de alberca…" className="h-8 text-xs" />
-                        )} />
+                return (
+                  <div key={field.id} className="border rounded-lg overflow-hidden shadow-sm">
+                    {/* ── Fila principal ── */}
+                    <div className="grid grid-cols-12 gap-1 px-3 py-2.5 bg-white items-center">
+                      {/* Descripción */}
+                      <div className="col-span-5">
+                        <FormField control={form.control} name={`partidas.${i}.descripcion`}
+                          render={({ field: f }) => (
+                            <Input {...f} placeholder="Ej. Obra negra, Tema eléctrico…" className="h-8 text-sm font-medium" />
+                          )} />
+                      </div>
+
+                      {/* Cantidad */}
+                      <div className="col-span-2">
+                        <FormField control={form.control} name={`partidas.${i}.cantidad`}
+                          render={({ field: f }) => (
+                            <Input type="number" step="0.01" min="0" className="h-8 text-xs text-right"
+                              placeholder="Cant."
+                              value={f.value}
+                              onChange={e => { f.onChange(parseFloat(e.target.value) || 0); actualizarSubtotal(i); }}
+                            />
+                          )} />
+                      </div>
+
+                      {/* Precio unitario */}
+                      <div className="col-span-3">
+                        <FormField control={form.control} name={`partidas.${i}.precioUnitario`}
+                          render={({ field: f }) => (
+                            <div className="relative">
+                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+                              <Input type="number" step="0.01" min="0" className="h-8 text-xs text-right pl-5"
+                                placeholder="0.00"
+                                value={f.value}
+                                onChange={e => { f.onChange(parseFloat(e.target.value) || 0); actualizarSubtotal(i); }}
+                              />
+                            </div>
+                          )} />
+                      </div>
+
+                      {/* Subtotal */}
+                      <div className="col-span-1 text-right">
+                        <span className="text-xs font-bold text-[#4a5e30]">
+                          ${monto.toLocaleString("es-MX", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+
+                      {/* Acciones */}
+                      <div className="col-span-1 flex items-center justify-end gap-0.5">
+                        <Button type="button" variant="ghost" size="sm"
+                          className={cn("h-7 w-7 p-0 transition-colors", isExpanded ? "text-[#4a5e30]" : "text-gray-400 hover:text-[#4a5e30]")}
+                          title={isExpanded ? "Ocultar detalle" : "Agregar sub-conceptos / nota"}
+                          onClick={() => toggleExpand(i)}>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </Button>
+                        <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
+                          onClick={() => { remove(i); calcularTotal(); setExpandedRows(prev => { const n = new Set(prev); n.delete(i); return n; }); }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
 
-                    {/* Unidad */}
-                    <div className="col-span-2">
-                      <FormField control={form.control} name={`partidas.${i}.unidad`}
-                        render={({ field: f }) => (
-                          <Select onValueChange={f.onChange} value={f.value}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        )} />
-                    </div>
+                    {/* ── Panel expandible: sub-conceptos + nota ── */}
+                    {isExpanded && (
+                      <div className="bg-gray-50 border-t px-4 py-3 space-y-3">
+                        {/* Sub-conceptos */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Sub-conceptos</p>
+                            <Button type="button" variant="outline" size="sm" className="h-6 px-2 text-[10px] gap-1"
+                              onClick={() => agregarSubItem(i)}>
+                              <Plus className="w-3 h-3" /> Agregar
+                            </Button>
+                          </div>
+                          {subItems.length === 0 ? (
+                            <p className="text-xs text-gray-400 italic">Sin sub-conceptos. Agrega detalles como materiales, actividades incluidas…</p>
+                          ) : (
+                            <div className="space-y-1.5">
+                              {subItems.map((sub: string, j: number) => (
+                                <div key={j} className="flex items-center gap-2">
+                                  <span className="text-[#4a5e30] text-sm leading-none">•</span>
+                                  <Input
+                                    className="h-7 text-xs flex-1"
+                                    placeholder="Ej. Quitar arenilla, Yeso en paredes…"
+                                    value={sub}
+                                    onChange={e => {
+                                      const cur = [...(form.getValues(`partidas.${i}.subItems`) || [])];
+                                      cur[j] = e.target.value;
+                                      form.setValue(`partidas.${i}.subItems`, cur);
+                                    }}
+                                  />
+                                  <Button type="button" variant="ghost" size="sm"
+                                    className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
+                                    onClick={() => quitarSubItem(i, j)}>
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
 
-                    {/* Cantidad */}
-                    <div className="col-span-2">
-                      <FormField control={form.control} name={`partidas.${i}.cantidad`}
-                        render={({ field: f }) => (
-                          <Input type="number" step="0.01" min="0" className="h-8 text-xs text-right"
-                            value={f.value}
-                            onChange={e => { f.onChange(parseFloat(e.target.value) || 0); actualizarSubtotal(i); }}
+                        {/* Nota / condición */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Nota / Condición</p>
+                          <Input
+                            className="h-7 text-xs italic"
+                            placeholder="Ej. Materiales proporcionados por el cliente, incluye garantía de 1 año…"
+                            value={nota}
+                            onChange={e => form.setValue(`partidas.${i}.nota`, e.target.value)}
                           />
-                        )} />
-                    </div>
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Precio unitario */}
-                    <div className="col-span-2">
-                      <FormField control={form.control} name={`partidas.${i}.precioUnitario`}
-                        render={({ field: f }) => (
-                          <Input type="number" step="0.01" min="0" className="h-8 text-xs text-right"
-                            value={f.value}
-                            onChange={e => { f.onChange(parseFloat(e.target.value) || 0); actualizarSubtotal(i); }}
-                          />
-                        )} />
-                    </div>
-
-                    {/* Subtotal */}
-                    <div className="col-span-1 text-right">
-                      <span className="text-xs font-semibold text-[#4a5e30]">
-                        ${((form.watch(`partidas.${i}.cantidad`) || 0) * (form.watch(`partidas.${i}.precioUnitario`) || 0)).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
-                    </div>
-
-                    {/* Eliminar */}
-                    <div className="col-span-1 flex justify-end">
-                      <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
-                        onClick={() => { remove(i); calcularTotal(); }}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+                    {/* Indicador visual de sub-conceptos cuando está cerrado */}
+                    {!isExpanded && (subItems.length > 0 || nota) && (
+                      <div className="px-4 py-1.5 bg-[#4a5e30]/5 border-t flex items-center gap-2 text-[10px] text-[#4a5e30]">
+                        {subItems.length > 0 && <span>• {subItems.length} sub-concepto{subItems.length > 1 ? "s" : ""}</span>}
+                        {nota && <span>• Nota: {nota.length > 40 ? nota.slice(0, 40) + "…" : nota}</span>}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                );
+              })}
 
-              {/* Total row */}
-              <div className="bg-[#4a5e30]/5 border-t px-3 py-3 flex items-center justify-between gap-3">
-                <Button type="button" variant="outline" size="sm" className="gap-1 text-xs"
-                  onClick={() => { calcularTotal(); }}>
-                  <Calculator className="w-3.5 h-3.5" /> Calcular total
-                </Button>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">Total calculado:</span>
-                  <span className="text-lg font-bold text-[#4a5e30]">
-                    ${totalCalculado.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
-                  </span>
+              {/* Total calculado */}
+              <div className="flex items-center justify-between px-4 py-3 bg-[#4a5e30]/5 rounded-lg border border-[#4a5e30]/20">
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" className="gap-1 text-xs h-7"
+                    onClick={calcularTotal}>
+                    <Calculator className="w-3.5 h-3.5" /> Recalcular
+                  </Button>
+                  <span className="text-xs text-muted-foreground">{fields.length} partida{fields.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total calculado</p>
+                  <p className="text-lg font-bold text-[#4a5e30]">
+                    ${totalCalculado.toLocaleString("es-MX", { minimumFractionDigits: 2 })} MXN
+                  </p>
                 </div>
               </div>
             </div>
@@ -376,7 +452,7 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
         <FormField control={form.control} name="totalEstimate" render={({ field }) => (
           <FormItem>
             <FormLabel className="font-semibold">Total Estimado (MXN)</FormLabel>
-            <p className="text-xs text-muted-foreground">Se calcula automáticamente de las partidas, o puedes ajustarlo manualmente</p>
+            <p className="text-xs text-muted-foreground">Se calcula automáticamente de las partidas, o ajústalo manualmente</p>
             <FormControl>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
@@ -396,8 +472,8 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
             <FormLabel className="font-semibold">Alcance del Trabajo</FormLabel>
             <p className="text-xs text-muted-foreground">Descripción general del proyecto (aparece en el PDF)</p>
             <FormControl>
-              <Textarea {...field} placeholder="Describe el alcance general del proyecto: materiales, acabados, garantías, condiciones…"
-                className="min-h-[100px]" />
+              <Textarea {...field} placeholder="Describe el alcance general: materiales, acabados, garantías, condiciones…"
+                className="min-h-[90px]" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -454,9 +530,9 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem>
             <FormLabel>Notas Internas</FormLabel>
-            <p className="text-xs text-muted-foreground">Solo visibles para el equipo, no aparecen en el PDF del cliente</p>
+            <p className="text-xs text-muted-foreground">Solo visibles para el equipo, no aparecen en el PDF</p>
             <FormControl>
-              <Textarea {...field} placeholder="Notas sobre materiales especiales, condiciones del cliente, seguimiento…"
+              <Textarea {...field} placeholder="Seguimiento, condiciones especiales del cliente, materiales especiales…"
                 className="min-h-[80px]" />
             </FormControl>
             <FormMessage />
@@ -475,7 +551,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
         </div>
       </form>
 
-      {/* ClientForm — tiene su propio Dialog interno */}
       <ClientForm
         open={showClientForm}
         onClose={() => {
@@ -483,7 +558,6 @@ export function PergoniaQuoteForm({ initialData, onSuccess }: Props) {
           queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
         }}
       />
-
     </Form>
   );
 }
